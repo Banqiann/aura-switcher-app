@@ -483,7 +483,7 @@ final class Engine {
     }
     // tuned on ~2000 words per language (tools/langmodel.py): a word with no dictionary must look clearly
     // more typical than what was typed; a real dictionary word only somewhat more
-    static let marginNeeded = 20.0, marginForDictWord = 5.0
+    static let marginNeeded = 20.0, marginForDictWord = 5.0, marginCyrillic = 11.0  // Belarusian ↔ Russian: «длінный» 13, true «сіла» 4
 
     func autoFix(_ keys: [Key]) -> Layout? {
         guard keys.count >= 2, let cur = typedLayout(keys) else { return nil }
@@ -504,7 +504,7 @@ final class Engine {
             if dictionaryWorks(l.lang) {
                 // without the typed language's dictionary, also ask the models which side looks real
                 // close languages in one script (Belarusian ↔ Russian) need the strict margin
-                let need = isCyrillic(typed) && isCyrillic(t) ? Engine.marginNeeded : Engine.marginForDictWord
+                let need = isCyrillic(typed) && isCyrillic(t) ? Engine.marginCyrillic : Engine.marginForDictWord
                 if isWord(t, l.lang), curDict || (m ?? 0) >= need { return l }
             } else if let lm = model(l.lang) {
                 // no dictionary there: a frequent word, or clearly more typical than what was typed

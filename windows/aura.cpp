@@ -513,7 +513,7 @@ static double margin(const wstring& typed, const wstring& cur, const wstring& t,
 }
 // tuned on ~2000 words per language (tools/langmodel.py): a word with no dictionary must look clearly
 // more typical than what was typed; a real dictionary word only somewhat more
-static const double kMarginNeeded = 20, kMarginForDictWord = 5;
+static const double kMarginNeeded = 20, kMarginForDictWord = 5, kMarginCyrillic = 11;  // Belarusian ↔ Russian: «длінный» 13, true «сіла» 4
 
 static void warmUpDictionaries() { reliable.clear(); for (auto& l : layouts) isWord(L"aura", l.locale); }
 
@@ -536,7 +536,7 @@ static int autoFixTarget(const vector<Key>& keys) {
         if (dictionaryWorks(layouts[j].locale)) {
             // without the typed language's dictionary, also ask the models which side looks real
             // close languages in one script (Belarusian ↔ Russian) need the strict margin
-            double need = isCyrillic(typed) && isCyrillic(t) ? kMarginNeeded : kMarginForDictWord;
+            double need = isCyrillic(typed) && isCyrillic(t) ? kMarginCyrillic : kMarginForDictWord;
             if (isWord(t, layouts[j].locale) && (curDict || m >= need)) return j;
         } else if (const LangModel* lm = model(layouts[j].locale)) {
             // no dictionary there: a frequent word, or clearly more typical than what was typed
