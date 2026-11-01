@@ -389,6 +389,17 @@ static bool isWord(wstring w, const wstring& locale) {
     return clean;
 }
 
+// five Cyrillic consonants in a row: gibberish the spell checker let through ("brachii," → «икфсршшб»)
+static bool consonantRun(const wstring& s) {
+    int run = 0;
+    for (wchar_t c : s) {
+        wchar_t l = wchar_t(UINT_PTR(CharLowerW(LPWSTR(UINT_PTR(c)))));
+        run = wcschr(L"бвгґджзйклмнпрстфхцчшщ", l) && l ? run + 1 : 0;
+        if (run >= 5) return true;
+    }
+    return false;
+}
+
 static bool isLatin(const wstring& s) { for (wchar_t c : s) if (c >= 0x250) return false; return true; }
 
 // The first spell check in a language loads its dictionary (can take a moment). If that happens
@@ -407,7 +418,7 @@ static int autoFixTarget(const vector<Key>& keys) {
         // Cyrillic UK/RU differ in few keys but that's exactly what users mix up, so they're allowed.
         size_t same = 0; for (size_t p = 0; p < t.size() && p < typed.size(); p++) same += t[p] == typed[p];
         if (isLatin(t) && isLatin(typed) && same * 2 > keys.size()) continue;
-        if (t.size() == keys.size() && isWord(t, layouts[j].locale)) return j;
+        if (t.size() == keys.size() && isWord(t, layouts[j].locale) && !consonantRun(t)) return j;
     }
     return -1;
 }

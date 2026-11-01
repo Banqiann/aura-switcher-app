@@ -374,6 +374,13 @@ final class Engine {
                                      inSpellDocumentWithTag: 0, wordCount: nil).location == NSNotFound
     }
 
+    /// five Cyrillic consonants in a row: gibberish the spell checker let through ("brachii," → «икфсршшб»)
+    func consonantRun(_ s: String) -> Bool {
+        var run = 0
+        for c in s.lowercased() { run = "бвгґджзйклмнпрстфхцчшщ".contains(c) ? run + 1 : 0; if run >= 5 { return true } }
+        return false
+    }
+
     func isLatin(_ s: String) -> Bool { s.unicodeScalars.allSatisfy { $0.value < 0x250 } }
 
     /// Layout the word was really typed in: the one whose characters match what the key events produced
@@ -399,7 +406,7 @@ final class Engine {
             // Cyrillic UK/RU differ in few keys but that's exactly what users mix up, so they're allowed.
             let same = zip(t, typed).filter { $0 == $1 }.count
             if isLatin(t), isLatin(typed), same * 2 > keys.count { continue }
-            if t.count == keys.count, isWord(t, l.lang) { return l }
+            if t.count == keys.count, isWord(t, l.lang), !consonantRun(t) { return l }
         }
         return nil
     }
