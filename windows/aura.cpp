@@ -23,6 +23,9 @@
 #include <atomic>
 #include <ctime>
 #include <map>
+#include <memory>
+#include <unordered_map>
+#include <unordered_set>
 #include <string>
 #include <vector>
 
@@ -417,8 +420,9 @@ static std::map<wstring, bool> reliable;
 static bool dictionaryWorks(const wstring& locale) {
     auto it = reliable.find(locale);
     if (it != reliable.end()) return it->second;
-    bool r = true;
+    bool r = checkerFor(locale) != nullptr;  // no dictionary at all: not "works" — the language model takes over
     for (auto& l : layouts) {
+        if (!r) break;
         if (l.locale != locale) continue;
         for (const char* codes : {"QXQXQXQ", "ZZZZZZZ"}) {
             vector<Key> keys; for (const char* c = codes; *c; c++) keys.push_back({BYTE(*c), false});
@@ -457,25 +461,87 @@ static bool consonantRun(const wstring& s) {
     return false;
 }
 
+static bool isCyrillic(const wstring& s) { for (wchar_t c : s) if (c >= 0x400 && c <= 0x52F) return true; return false; }
 static bool isLatin(const wstring& s) { for (wchar_t c : s) if (c >= 0x250) return false; return true; }
 
 // The first spell check in a language loads its dictionary (can take a moment). If that happens
 // while the user types on, the correction is skipped — so load all dictionaries up front.
+// MARK: - Language models
+// For languages whose dictionary may be missing (lang/<code>.txt, embedded as LM_<CODE>): the most frequent
+// words, and letter-trigram costs (−10·ln p) that tell a word typed in the wrong layout from an English typo.
+struct LangModel {
+    std::unordered_set<wstring> words; std::unordered_map<wstring, int> tri; int floor = 100;
+    bool has(wstring w) const { CharLowerBuffW(&w[0], DWORD(w.size())); return words.count(w) > 0; }
+    double cost(wstring w) const {  // average trigram cost: lower = more typical of the language
+        CharLowerBuffW(&w[0], DWORD(w.size()));
+        wstring c = L"^" + w + L"$";
+        if (c.size() < 3) return floor;
+        int sum = 0;
+        for (size_t i = 0; i + 3 <= c.size(); i++) { auto it = tri.find(c.substr(i, 3)); sum += it == tri.end() ? floor : it->second; }
+        return double(sum) / double(c.size() - 2);
+    }
+};
+static std::map<wstring, std::unique_ptr<LangModel>> models;
+static const LangModel* model(const wstring& locale) {
+    wstring code = locale.substr(0, 2);
+    auto it = models.find(code);
+    if (it != models.end()) return it->second.get();
+    std::unique_ptr<LangModel> m;
+    wstring name = L"LM_" + code; CharUpperBuffW(&name[0], DWORD(name.size()));
+    if (HRSRC r = FindResourceW(nullptr, name.c_str(), RT_RCDATA)) {
+        const char* p = (const char*)LockResource(LoadResource(nullptr, r)); int n = int(SizeofResource(nullptr, r));
+        int wn = MultiByteToWideChar(CP_UTF8, 0, p, n, nullptr, 0);
+        wstring s(wn, 0); MultiByteToWideChar(CP_UTF8, 0, p, n, &s[0], wn);
+        m.reset(new LangModel());
+        bool first = true; int maxCost = 0; size_t pos = 0;
+        while (pos < s.size()) {
+            size_t e = s.find(L'\n', pos); if (e == wstring::npos) e = s.size();
+            wstring line = s.substr(pos, e - pos); pos = e + 1;
+            if (line.empty() || line[0] == L'#') continue;
+            if (first) { first = false; size_t a = 0; while (a < line.size()) { size_t b = line.find(L' ', a); if (b == wstring::npos) b = line.size(); if (b > a) m->words.insert(line.substr(a, b - a)); a = b + 1; } continue; }
+            size_t t = line.find(L'\t');
+            if (t != wstring::npos) { int v = _wtoi(line.c_str() + t + 1); m->tri[line.substr(0, t)] = v; maxCost = std::max(maxCost, v); }
+        }
+        m->floor = maxCost + 10;
+    }
+    return (models[code] = std::move(m)).get();
+}
+// how much more typical `t` is of its language than `typed` of its own; -1e9 without both models
+static double margin(const wstring& typed, const wstring& cur, const wstring& t, const wstring& lang) {
+    const LangModel* a = model(cur); const LangModel* b = model(lang);
+    return a && b ? a->cost(typed) - b->cost(t) : -1e9;
+}
+// tuned on ~2000 words per language (tools/langmodel.py): a word with no dictionary must look clearly
+// more typical than what was typed; a real dictionary word only somewhat more
+static const double kMarginNeeded = 20, kMarginForDictWord = 5;
+
 static void warmUpDictionaries() { reliable.clear(); for (auto& l : layouts) isWord(L"aura", l.locale); }
 
 static int autoFixTarget(const vector<Key>& keys) {
     if (keys.size() < 2 || layouts.empty()) return -1;
     int cur = layoutIndex(fgLayout());
-    if (!dictionaryWorks(layouts[cur].locale)) return -1;  // typed in a language we can't check: may well be right
+    const wstring& curLoc = layouts[cur].locale;
+    bool curDict = dictionaryWorks(curLoc);
+    if (!curDict && !model(curLoc)) return -1;  // typed in a language we can't check at all: may well be right
     wstring typed = layouts[cur].text(keys);
-    if (S.isUserWord(typed) || isWord(typed, layouts[cur].locale)) return -1;
+    if (S.isUserWord(typed) || (curDict ? isWord(typed, curLoc) : model(curLoc)->has(typed))) return -1;
     for (size_t i = 1; i < layouts.size(); i++) {
         int j = int((cur + i) % layouts.size());
         wstring t = layouts[j].text(keys);
         // same text in two Latin layouts (an English typo that is a Polish word): nothing to fix.
         // Cyrillic UK/RU words spelled the same still switch the layout — that's what users mix up.
         if (t == typed && isLatin(t)) continue;
-        if (layouts[j].maps(keys) && isWord(t, layouts[j].locale) && !consonantRun(t)) return j;
+        if (!layouts[j].maps(keys) || consonantRun(t)) continue;
+        double m = margin(typed, curLoc, t, layouts[j].locale);
+        if (dictionaryWorks(layouts[j].locale)) {
+            // without the typed language's dictionary, also ask the models which side looks real
+            // close languages in one script (Belarusian ↔ Russian) need the strict margin
+            double need = isCyrillic(typed) && isCyrillic(t) ? kMarginNeeded : kMarginForDictWord;
+            if (isWord(t, layouts[j].locale) && (curDict || m >= need)) return j;
+        } else if (const LangModel* lm = model(layouts[j].locale)) {
+            // no dictionary there: a frequent word, or clearly more typical than what was typed
+            if (lm->has(t) || m >= kMarginNeeded) return j;
+        }
     }
     return -1;
 }

@@ -15,6 +15,7 @@ for ARCH in arm64 x86_64; do
 done
 lipo -create build/bin-arm64 build/bin-x86_64 -output "$APP/Contents/MacOS/$NAME"
 cp AppIcon.icns "$APP/Contents/Resources/"
+cp -R lang "$APP/Contents/Resources/"   # language models (tools/langmodel.py)
 cat > "$APP/Contents/Info.plist" <<EOF
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">

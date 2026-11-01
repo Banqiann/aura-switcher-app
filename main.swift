@@ -37,7 +37,7 @@ final class Layout {
                     var chars = [UniChar](repeating: 0, count: 4)
                     let mod: UInt32 = shift ? UInt32((shiftKey >> 8) & 0xFF) : 0
                     UCKeyTranslate(layout, code, UInt16(kUCKeyActionDown), mod, UInt32(LMGetKbdType()),
-                                   OptionBits(kUCKeyTranslateNoDeadKeysBit), &dead, 4, &len, &chars)
+                                   OptionBits(1 << kUCKeyTranslateNoDeadKeysBit), &dead, 4, &len, &chars)
                     guard len == 1, chars[0] >= 0x20, let s = Unicode.Scalar(chars[0]) else { continue }
                     let c = Character(s)
                     let k = Key(code: code, shift: shift)
@@ -112,6 +112,32 @@ func displayCode(_ lang: String?) -> String {
 }
 
 func currentLang() -> String? { sourceLang(TISCopyCurrentKeyboardInputSource().takeRetainedValue()) }
+
+// MARK: - Language models
+
+/// For languages whose spelling dictionary may be missing (lang/<code>.txt, built by tools/langmodel.py):
+/// the most frequent words, and letter-trigram costs (−10·ln p) that tell a word of the language
+/// typed in the wrong layout from an English typo.
+final class LangModel {
+    let words: Set<String>, tri: [String: Int], floor: Int
+    init?(_ lang: String) {
+        guard let url = Bundle.main.url(forResource: lang, withExtension: "txt", subdirectory: "lang"),
+              let s = try? String(contentsOf: url, encoding: .utf8) else { return nil }
+        let lines = s.split(separator: "\n").filter { !$0.hasPrefix("#") }
+        guard let first = lines.first else { return nil }
+        words = Set(first.split(separator: " ").map(String.init))
+        var t: [String: Int] = [:]
+        for l in lines.dropFirst() { let p = l.split(separator: "\t"); if p.count == 2, let v = Int(p[1]) { t[String(p[0])] = v } }
+        tri = t; floor = (t.values.max() ?? 100) + 10
+    }
+    func has(_ w: String) -> Bool { words.contains(w.lowercased()) }
+    /// average trigram cost: lower = more typical of the language
+    func cost(_ w: String) -> Double {
+        let c = Array("^" + w.lowercased() + "$")
+        guard c.count >= 3 else { return Double(floor) }
+        return Double((0..<c.count - 2).reduce(0) { $0 + (tri[String(c[$1..<$1 + 3])] ?? floor) }) / Double(c.count - 2)
+    }
+}
 
 // MARK: - Settings
 
@@ -412,8 +438,9 @@ final class Engine {
     var reliable: [String: Bool] = [:]
     func dictionaryWorks(_ lang: String) -> Bool {
         if let r = reliable[lang] { return r }
-        var r = true
-        if let l = layouts.first(where: { $0.lang == lang }) {
+        // no dictionary at all (Belarusian): not "works" — the language model takes over
+        var r = NSSpellChecker.shared.availableLanguages.contains { $0.hasPrefix(lang) }
+        if r, let l = layouts.first(where: { $0.lang == lang }) {
             for codes: [UInt16] in [[12, 7, 12, 7, 12, 7, 12], [6, 6, 6, 6, 6, 6, 6]] {  // qxqxqxq, zzzzzzz
                 let w = l.text(codes.map { Key(code: $0, shift: false) })
                 if w.count == codes.count, spell(w, lang) { r = false }
@@ -430,6 +457,7 @@ final class Engine {
         return false
     }
 
+    func isCyrillic(_ s: String) -> Bool { s.unicodeScalars.contains { (0x400...0x52F).contains($0.value) } }
     func isLatin(_ s: String) -> Bool { s.unicodeScalars.allSatisfy { $0.value < 0x250 } }
 
     /// Layout the word was really typed in: the one whose characters match what the key events produced
@@ -443,11 +471,27 @@ final class Engine {
         return matches.first ?? sys
     }
 
+    var models: [String: LangModel?] = [:]
+    func model(_ lang: String) -> LangModel? {
+        if let m = models[lang] { return m }
+        let m = LangModel(lang); models[lang] = m; return m
+    }
+    /// how much more typical `t` is of its language than `typed` of its own (trigram costs); nil without both models
+    func margin(_ typed: String, _ cur: String, _ t: String, _ lang: String) -> Double? {
+        guard let a = model(cur), let b = model(lang) else { return nil }
+        return a.cost(typed) - b.cost(t)
+    }
+    // tuned on ~2000 words per language (tools/langmodel.py): a word with no dictionary must look clearly
+    // more typical than what was typed; a real dictionary word only somewhat more
+    static let marginNeeded = 20.0, marginForDictWord = 5.0
+
     func autoFix(_ keys: [Key]) -> Layout? {
-        // typed in a language we can't check: it may well be right — leave it
-        guard keys.count >= 2, let cur = typedLayout(keys), dictionaryWorks(cur.lang) else { return nil }
+        guard keys.count >= 2, let cur = typedLayout(keys) else { return nil }
         let typed = cur.text(keys)
-        if settings.words.contains(typed.lowercased()) || isWord(typed, cur.lang) { return nil }
+        let curDict = dictionaryWorks(cur.lang)
+        // typed in a language we can't check at all: it may well be right — leave it
+        guard curDict || model(cur.lang) != nil else { return nil }
+        if settings.words.contains(typed.lowercased()) || (curDict ? isWord(typed, cur.lang) : model(cur.lang)!.has(typed)) { return nil }
         let start = index(cur.lang)
         for i in 1..<max(layouts.count, 1) {
             let l = layouts[(start + i) % layouts.count]
@@ -455,7 +499,17 @@ final class Engine {
             // same text in two Latin layouts (an English typo that is a Polish word): nothing to fix.
             // Cyrillic UK/RU words spelled the same still switch the layout — that's what users mix up.
             if t == typed, isLatin(t) { continue }
-            if l.maps(keys), isWord(t, l.lang), !consonantRun(t) { return l }
+            guard l.maps(keys), !consonantRun(t) else { continue }
+            let m = margin(typed, cur.lang, t, l.lang)
+            if dictionaryWorks(l.lang) {
+                // without the typed language's dictionary, also ask the models which side looks real
+                // close languages in one script (Belarusian ↔ Russian) need the strict margin
+                let need = isCyrillic(typed) && isCyrillic(t) ? Engine.marginNeeded : Engine.marginForDictWord
+                if isWord(t, l.lang), curDict || (m ?? 0) >= need { return l }
+            } else if let lm = model(l.lang) {
+                // no dictionary there: a frequent word, or clearly more typical than what was typed
+                if lm.has(t) || (m ?? 0) >= Engine.marginNeeded { return l }
+            }
         }
         return nil
     }

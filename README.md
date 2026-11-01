@@ -36,12 +36,12 @@ AURA uses **every layout enabled in macOS**: System Settings → Keyboard → In
 | Feature | Works with |
 |---|---|
 | Double ⇧ | any regular keyboard layout |
-| Auto-correction | languages with a macOS dictionary: Ukrainian, English, Russian, German, French, Spanish, Italian, Portuguese, Polish, Turkish, Dutch, Czech, Swedish, Finnish, Romanian, Hungarian, Greek, Bulgarian, Hebrew, Arabic, Hindi, Korean |
+| Auto-correction | Ukrainian, English, Russian, Belarusian, German, French, Spanish, Italian, Portuguese, Polish, Turkish, Dutch, Czech, Swedish, Finnish, Romanian, Hungarian, Greek, Bulgarian, Hebrew, Arabic, Hindi — with the macOS dictionary, or AURA's own language model when the dictionary isn't there |
 | Not supported | Chinese, Japanese (input via candidates, not via a layout) |
 
 **UK ↔ RU** is corrected: "міло" → "мыло", "вібор" → "выбор". If a word is spelled the same in both layouts ("привет"), the text stays and AURA only switches the layout. Words valid in both languages ("сир", "мі") are left alone — use double ⇧ for those.
 
-Auto-correction is skipped between similar Latin layouts (EN ↔ DE ↔ FR): there a typo can't be told apart from a layout mistake. Use double ⇧ for those.
+Between Latin layouts (EN ↔ DE ↔ FR…) a word is corrected when it is a real word only in the other layout: "sch;n" → "schön". Accents typed with a dead key (´ then e) count as one letter.
 
 ## Menu bar
 
@@ -82,7 +82,8 @@ Archive for other Macs: `./build.sh --release` → `dist/AURA-Switcher-<version>
 - A single Swift file: `main.swift` (public repo https://github.com/klbk/aura-switcher-app), build script `build.sh` next to it. No external dependencies. Universal build: Apple Silicon + Intel.
 - Keystrokes are read with a **listen-only** `CGEventTap`: the system never waits for AURA, so it can't freeze the keyboard or mouse.
 - Character tables are built from the macOS layouts themselves (`UCKeyTranslate`), so any layout works without manual setup.
-- Word checking uses the system spell checker (`NSSpellChecker`), after the Space has already been typed.
+- Word checking uses the system spell checker (`NSSpellChecker`), after the Space has already been typed. A dictionary macOS hasn't downloaded accepts any string, so each one is checked on nonsense first.
+- Where there is no working dictionary, AURA uses its own language models (`lang/`, built by `tools/langmodel.py`): frequent words and letter trigrams. Data: [FrequencyWords](https://github.com/hermitdave/FrequencyWords) by Hermit Dave and Belarusian Wikipedia, both CC BY-SA 4.0.
 - Replacement uses synthetic keystrokes: Backspace × word length, then the corrected text.
 - Selected text comes from the Accessibility API, or via ⌘C with clipboard restore if the app doesn't expose it.
 - Settings are stored in `UserDefaults` (`com.chernov.aura`).

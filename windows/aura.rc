@@ -1,6 +1,20 @@
 1 ICON "aura.ico"
 1 24 "aura.manifest"
 
+// language models (tools/langmodel.py): frequent words + letter trigrams for languages without a dictionary
+LM_EN RCDATA "../lang/en.txt"
+LM_UK RCDATA "../lang/uk.txt"
+LM_RU RCDATA "../lang/ru.txt"
+LM_BE RCDATA "../lang/be.txt"
+LM_EL RCDATA "../lang/el.txt"
+LM_HE RCDATA "../lang/he.txt"
+LM_AR RCDATA "../lang/ar.txt"
+LM_HI RCDATA "../lang/hi.txt"
+LM_CS RCDATA "../lang/cs.txt"
+LM_FI RCDATA "../lang/fi.txt"
+LM_RO RCDATA "../lang/ro.txt"
+LM_HU RCDATA "../lang/hu.txt"
+
 1 VERSIONINFO
 FILEVERSION 0,7,1,0
 PRODUCTVERSION 0,7,1,0
