@@ -26,7 +26,7 @@
 #include <string>
 #include <vector>
 
-#define APP_VERSION L"0.7.1"
+#define APP_VERSION L"0.7.2"
 #ifndef BUILD_TIME
 #define BUILD_TIME 0  // build.sh passes the build date (seconds since 1970)
 #endif
@@ -258,15 +258,15 @@ static wstring fgExe() {
 
 // MARK: - Hook thread state (touched only by the hook thread)
 
-static vector<Key> word, lastWord;
+static vector<Key> word, lastWord, before;  // before: one-letter word right before `word` («z буду»), fixed together with it
 static int trailing = 0;
 static std::atomic<unsigned> seq{0};            // bumps on every real key; main thread uses it to detect typing
 static std::atomic<bool> resetReq{false}, active{true};
 static ULONGLONG shiftDownAt = 0, lastShiftTap = 0; static bool sawOther = false, shiftHeld = false;
 
-struct Snapshot { vector<Key> keys; int trailing; unsigned seq; };
+struct Snapshot { vector<Key> keys; int trailing; unsigned seq; vector<Key> before; };
 
-static void resetState() { word.clear(); lastWord.clear(); trailing = 0; }
+static void resetState() { word.clear(); lastWord.clear(); before.clear(); trailing = 0; }
 
 static LRESULT CALLBACK kbHook(int code, WPARAM wp, LPARAM lp) {
     auto* k = (KBDLLHOOKSTRUCT*)lp;
@@ -300,14 +300,15 @@ static LRESULT CALLBACK kbHook(int code, WPARAM wp, LPARAM lp) {
     if (ctrlAlt) { resetState(); return CallNextHookEx(nullptr, code, wp, lp); }
 
     if (vk == VK_BACK) {
-        if (trailing > 0) { if (--trailing == 0) { word = lastWord; lastWord.clear(); } }
+        if (trailing > 0) { if (--trailing == 0) { word = lastWord; lastWord.clear(); before.clear(); } }
         else if (!word.empty()) word.pop_back();
     } else if (vk == VK_SPACE) {
         if (!word.empty()) {
             lastWord = word; word.clear(); trailing = 1;
-            PostMessageW(hwndMain, WM_AUTO, 0, (LPARAM)new Snapshot{lastWord, 1, seq.load()});
+            PostMessageW(hwndMain, WM_AUTO, 0, (LPARAM)new Snapshot{lastWord, 1, seq.load(), before});
         } else if (!lastWord.empty()) trailing++;
     } else if (isLetterVk(vk)) {
+        if (word.empty()) before = lastWord.size() == 1 && trailing == 1 ? lastWord : vector<Key>();
         if (trailing > 0 || !lastWord.empty()) { lastWord.clear(); trailing = 0; }
         bool shift = (GetAsyncKeyState(VK_SHIFT) & 0x8000) != 0;
         bool caps = (GetKeyState(VK_CAPITAL) & 1) != 0;
@@ -548,13 +549,25 @@ static void onDoubleShift(Snapshot* s) {
     if (copySelection(sel) && !isCopiedLine(sel)) convertSelection(sel); else cycleLayout();
 }
 
+// one-letter words: a single letter before a fixed word is fixed too («z буду» → «я буду»),
+// unless it is already a word where it was typed (English «a»)
+static bool isLetterWord(const wstring& c, const wstring& locale) {
+    static const std::map<wstring, wstring> w = {{L"uk", L"авзіїоуйя"}, {L"ru", L"авжикосуя"}, {L"en", L"ai"}};
+    auto it = w.find(locale.substr(0, 2));
+    return c.size() == 1 && it != w.end() && it->second.find(wchar_t(UINT_PTR(CharLowerW(LPWSTR(UINT_PTR(c[0])))))) != wstring::npos;
+}
+
 static void onAuto(Snapshot* s) {
     if (!S.autoFix || S.bindings.count(fgExe())) return;
     int j = autoFixTarget(s->keys);
     if (j < 0 || seq.load() != s->seq) return;  // user kept typing meanwhile — skip
     wstring out = layouts[j].text(s->keys);
+    const Layout& cur = layouts[layoutIndex(fgLayout())];
+    wstring b = layouts[j].text(s->before), bTyped = cur.text(s->before);
+    bool fixBefore = s->before.size() == 1 && b != bTyped && isLetterWord(b, layouts[j].locale) && !isLetterWord(bTyped, cur.locale);
     // UK/RU word spelled the same in both layouts: text is already right, only switch the layout
-    if (out != layouts[layoutIndex(fgLayout())].text(s->keys)) replaceText(int(s->keys.size()) + 1, out + L" ");
+    if (fixBefore) replaceText(int(s->keys.size()) + 3, b + L" " + out + L" ");
+    else if (out != cur.text(s->keys)) replaceText(int(s->keys.size()) + 1, out + L" ");
     selectLayout(layouts[j]);
     playSound(sndAuto);
 }

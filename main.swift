@@ -230,6 +230,7 @@ final class Engine {
     var word: [Key] = []        // word being typed
     var lastWord: [Key] = []    // previous word, still convertible
     var trailing = 0            // spaces typed after lastWord
+    var before: [Key] = []      // one-letter word right before `word` («z буду»), fixed together with it
 
     var shiftDownAt: TimeInterval = 0, lastShiftTap: TimeInterval = 0, sawOther = false
     var lastSelOut: String?, lastSelLang = 0
@@ -239,7 +240,7 @@ final class Engine {
 
     var active: Bool { settings.enabled && !frontIsGame && !settings.excluded.contains(frontBundle) }
 
-    func reset() { word = []; lastWord = []; trailing = 0 }
+    func reset() { word = []; lastWord = []; trailing = 0; before = [] }
 
     func layout(_ lang: String?) -> Layout? { layouts.first { $0.lang == lang } }
     func index(_ lang: String?) -> Int { layouts.firstIndex { $0.lang == lang } ?? 0 }
@@ -308,18 +309,19 @@ final class Engine {
         if !f.intersection([.maskCommand, .maskControl, .maskAlternate]).isEmpty { reset(); return }
         switch code {
         case 51: // backspace
-            if trailing > 0 { trailing -= 1; if trailing == 0 { word = lastWord; lastWord = [] } }
+            if trailing > 0 { trailing -= 1; if trailing == 0 { word = lastWord; lastWord = []; before = [] } }
             else if !word.isEmpty { word.removeLast() }
         case 49: // space (already delivered to the app)
             if !word.isEmpty {
                 lastWord = word; word = []; trailing = 1
                 if settings.auto, settings.bindings[frontBundle] == nil {
-                    let keys = lastWord
-                    DispatchQueue.main.async { self.autoCorrect(keys) }
+                    let keys = lastWord, pre = before
+                    DispatchQueue.main.async { self.autoCorrect(keys, before: pre) }
                 }
             } else if !lastWord.isEmpty { trailing += 1 }
         default:
             if codes.contains(code) {
+                if word.isEmpty { before = lastWord.count == 1 && trailing == 1 ? lastWord : [] }
                 if trailing > 0 || !lastWord.isEmpty { lastWord = []; trailing = 0 }
                 var len = 0
                 var buf = [UniChar](repeating: 0, count: 4)
@@ -330,13 +332,22 @@ final class Engine {
         }
     }
 
-    func autoCorrect(_ keys: [Key]) {
+    // one-letter words: a single letter before a fixed word is fixed too («z буду» → «я буду»),
+    // unless it is already a word where it was typed (English «a»)
+    static let letterWords = ["uk": "авзіїоуйя", "ru": "авжикосуя", "en": "ai"]
+
+    func autoCorrect(_ keys: [Key], before: [Key] = []) {
         // user kept typing meanwhile — skip
         guard lastWord == keys, word.isEmpty, trailing == 1, let fix = autoFix(keys) else { return }
         let out = fix.text(keys)
-        let typed = typedLayout(keys)?.text(keys)
+        let src = typedLayout(keys), typed = src?.text(keys)
+        let b = fix.text(before), bTyped = src?.text(before) ?? ""
+        let fixBefore = before.count == 1 && b.count == 1 && b != bTyped
+            && Engine.letterWords[fix.lang]?.contains(b.lowercased()) == true
+            && Engine.letterWords[src?.lang ?? ""]?.contains(bTyped.lowercased()) != true
         // UK/RU word spelled the same in both layouts: text is already right, only switch the layout
-        if out != typed { replace(count: keys.count + 1, with: out + " ") }
+        if fixBefore { replace(count: keys.count + 3, with: b + " " + out + " ") }
+        else if out != typed { replace(count: keys.count + 1, with: out + " ") }
         select(fix)
         Sounds.play(Sounds.auto)
     }
