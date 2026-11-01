@@ -22,6 +22,7 @@ final class Layout {
     let source: TISInputSource
     var toChar: [Key: Character] = [:]
     var toKey: [Character: Key] = [:]
+    var dead: [Key: String] = [:]   // dead key (accent typed before the letter) → its combining marks
 
     init?(lang: String, source: TISInputSource) {
         self.lang = lang
@@ -42,16 +43,43 @@ final class Layout {
                     let k = Key(code: code, shift: shift)
                     toChar[k] = c
                     if toKey[c] == nil { toKey[c] = k }
+                    var state: UInt32 = 0
+                    UCKeyTranslate(layout, code, UInt16(kUCKeyActionDown), mod, UInt32(LMGetKbdType()), 0, &state, 4, &len, &chars)
+                    if len == 0, state != 0 {  // the spacing accent (´ ΄ ¨) decomposes to space + combining marks
+                        let marks = String(String(c).decomposedStringWithCompatibilityMapping.unicodeScalars
+                            .filter { $0.properties.generalCategory == .nonspacingMark }.map(Character.init))
+                        if !marks.isEmpty { self.dead[k] = marks }
+                    }
                 }
             }
         }
     }
 
+    /// What the keys type in this layout; a dead key and the letter after it make one accented letter (´ e → é).
     func text(_ keys: [Key]) -> String {
-        keys.reduce(into: "") { s, k in
-            guard let c = toChar[k] else { return }
-            if k.caps, c.isLetter { s += c.uppercased() } else { s.append(c) }
+        var s = "", i = 0
+        while i < keys.count {
+            let k = keys[i]; i += 1
+            guard var c = toChar[k].map(String.init) else { continue }
+            if let n = keys[i...].first, let l = toChar[n], l.isLetter {
+                if let m = dead[k] { c = (String(l) + m).precomposedStringWithCanonicalMapping; i += 1; if n.caps { c = c.uppercased() } }
+            }
+            if k.caps, c.count == 1, c.first!.isLetter { c = c.uppercased() }
+            s += c
         }
+        return s
+    }
+
+    func maps(_ keys: [Key]) -> Bool { keys.allSatisfy { toChar[$0] != nil } }
+
+    /// Keys that type a character here: one key, or a dead key + letter for an accented one.
+    func keys(for c: Character) -> [Key]? {
+        if let k = toKey[c] { return [k] }
+        let sc = String(c).decomposedStringWithCanonicalMapping.unicodeScalars
+        guard let base = sc.first, let bk = toKey[Character(base)] else { return nil }
+        let marks = String(sc.dropFirst().map(Character.init))
+        guard !marks.isEmpty, let dk = dead.first(where: { $0.value == marks })?.key else { return nil }
+        return [dk, bk]
     }
 }
 
@@ -346,8 +374,9 @@ final class Engine {
             && Engine.letterWords[fix.lang]?.contains(b.lowercased()) == true
             && Engine.letterWords[src?.lang ?? ""]?.contains(bTyped.lowercased()) != true
         // UK/RU word spelled the same in both layouts: text is already right, only switch the layout
-        if fixBefore { replace(count: keys.count + 3, with: b + " " + out + " ") }
-        else if out != typed { replace(count: keys.count + 1, with: out + " ") }
+        let shown = typed?.count ?? keys.count  // on screen: accented letters are one character
+        if fixBefore { replace(count: bTyped.count + shown + 2, with: b + " " + out + " ") }
+        else if out != typed { replace(count: shown + 1, with: out + " ") }
         select(fix)
         Sounds.play(Sounds.auto)
     }
@@ -423,11 +452,10 @@ final class Engine {
         for i in 1..<max(layouts.count, 1) {
             let l = layouts[(start + i) % layouts.count]
             let t = l.text(keys)
-            // near-identical Latin layouts (QWERTY/QWERTZ/AZERTY): a typo there isn't a layout mistake.
-            // Cyrillic UK/RU differ in few keys but that's exactly what users mix up, so they're allowed.
-            let same = zip(t, typed).filter { $0 == $1 }.count
-            if isLatin(t), isLatin(typed), same * 2 > keys.count { continue }
-            if t.count == keys.count, isWord(t, l.lang), !consonantRun(t) { return l }
+            // same text in two Latin layouts (an English typo that is a Polish word): nothing to fix.
+            // Cyrillic UK/RU words spelled the same still switch the layout — that's what users mix up.
+            if t == typed, isLatin(t) { continue }
+            if l.maps(keys), isWord(t, l.lang), !consonantRun(t) { return l }
         }
         return nil
     }
@@ -452,7 +480,8 @@ final class Engine {
 
     func cycleWord(_ keys: [Key], trailing: Int) {
         guard let n = next(after: currentLang()) else { return }
-        replace(count: keys.count + trailing, with: n.text(keys) + String(repeating: " ", count: trailing))
+        let shown = typedLayout(keys)?.text(keys).count ?? keys.count
+        replace(count: shown + trailing, with: n.text(keys) + String(repeating: " ", count: trailing))
         select(n)
     }
 
@@ -461,13 +490,19 @@ final class Engine {
         var srcIdx: Int
         if text == lastSelOut, lastSelLang < layouts.count { srcIdx = lastSelLang } else {
             let cur = index(currentLang())
-            let scores = layouts.map { l in text.filter { l.toKey[$0] != nil && $0.isLetter }.count }
+            let scores = layouts.map { l in text.filter { $0.isLetter && l.keys(for: $0) != nil }.count }
             srcIdx = scores.indices.max { a, b in
                 scores[a] != scores[b] ? scores[a] < scores[b] : (a != cur && b == cur)
             } ?? cur
         }
         let srcL = layouts[srcIdx], dstIdx = (srcIdx + 1) % layouts.count, dst = layouts[dstIdx]
-        let out = String(text.map { c in srcL.toKey[c].flatMap { dst.toChar[$0] } ?? c })
+        // runs of convertible characters go through the keys (so accents compose), the rest stays
+        var out = "", run: [Key] = []
+        for c in text {
+            if let ks = srcL.keys(for: c), ks.allSatisfy({ dst.toChar[$0] != nil }) { run += ks; continue }
+            out += dst.text(run) + String(c); run = []
+        }
+        out += dst.text(run)
         typeText(out)
         for _ in 0..<out.count { postKey(123, flags: .maskShift) } // reselect (⇧← moves by character)
         lastSelOut = out; lastSelLang = dstIdx

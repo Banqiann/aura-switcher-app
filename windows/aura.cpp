@@ -167,19 +167,49 @@ static const wchar_t* L_(const wchar_t* en, const wchar_t* uk) {
 // caps (Caps Lock) only flips the case of letters, not digits or symbols; not part of comparison
 struct Key { BYTE vk; bool shift; bool caps = false; bool operator<(const Key& o) const { return vk != o.vk ? vk < o.vk : shift < o.shift; } bool operator==(const Key& o) const { return vk == o.vk && shift == o.shift; } };
 
+static wstring normalize(const wstring& s, NORM_FORM f) {
+    int n = NormalizeString(f, s.c_str(), int(s.size()), nullptr, 0);
+    if (n <= 0) return s;
+    wstring r(n, 0); n = NormalizeString(f, s.c_str(), int(s.size()), &r[0], n);
+    r.resize(n > 0 ? n : 0); return n > 0 ? r : s;
+}
+static bool isMark(wchar_t c) { return c >= 0x300 && c <= 0x36F; }
+
 struct Layout {
     HKL hkl; wstring locale;  // e.g. "uk-UA"
     std::map<Key, wchar_t> toChar;
     std::map<wchar_t, Key> toKey;
+    std::map<Key, wstring> dead;  // dead key (accent typed before the letter) → its combining marks
+    // what the keys type here; a dead key and the letter after it make one accented letter (´ e → é)
     wstring text(const vector<Key>& keys) const {
         wstring s;
-        for (auto& k : keys) {
+        for (size_t i = 0; i < keys.size(); i++) {
+            const Key& k = keys[i];
             auto it = toChar.find(k); if (it == toChar.end()) continue;
             wchar_t c = it->second;
             if (k.caps && IsCharAlphaW(c)) c = k.shift ? towlower(c) : towupper(c);  // Windows: Caps+Shift → lowercase
+            auto d = dead.find(k);
+            if (d != dead.end() && i + 1 < keys.size()) {
+                auto n = toChar.find(keys[i + 1]);
+                if (n != toChar.end() && IsCharAlphaW(n->second)) {
+                    wchar_t l = n->second; if (keys[i + 1].caps) l = keys[i + 1].shift ? towlower(l) : towupper(l);
+                    s += normalize(wstring(1, l) + d->second, NormalizationC); i++; continue;
+                }
+            }
             s += c;
         }
         return s;
+    }
+    bool maps(const vector<Key>& keys) const { for (auto& k : keys) if (!toChar.count(k)) return false; return true; }
+    // keys that type a character here: one key, or a dead key + letter for an accented one
+    bool keysFor(wchar_t c, vector<Key>& out) const {
+        auto it = toKey.find(c);
+        if (it != toKey.end()) { out.push_back(it->second); return true; }
+        wstring d = normalize(wstring(1, c), NormalizationD);
+        if (d.size() < 2) return false;
+        auto b = toKey.find(d[0]); if (b == toKey.end()) return false;
+        for (auto& kv : dead) if (kv.second == d.substr(1)) { out.push_back(kv.first); out.push_back(b->second); return true; }
+        return false;
     }
     wstring code() const;
 };
@@ -219,10 +249,14 @@ static vector<Layout> loadLayouts() {
                 wchar_t buf[4];
                 UINT sc = MapVirtualKeyExW(vk, MAPVK_VK_TO_VSC, list[i]);
                 int len = ToUnicodeEx(vk, sc, state, buf, 4, 4 /* don't change kbd state */, list[i]);
-                if (len != 1 || buf[0] < 0x20) continue;
+                if ((len != 1 && len != -1) || buf[0] < 0x20) continue;
                 Key k{BYTE(vk), sh != 0};
                 L.toChar[k] = buf[0];
                 if (!L.toKey.count(buf[0])) L.toKey[buf[0]] = k;
+                if (len == -1) {  // dead key: the spacing accent (´ ΄ ¨) decomposes to space + combining marks
+                    wstring m; for (wchar_t c : normalize(wstring(1, buf[0]), NormalizationKD)) if (isMark(c)) m += c;
+                    if (!m.empty()) L.dead[k] = m;
+                }
             }
         }
         if (!L.toChar.empty()) r.push_back(L);
@@ -438,11 +472,10 @@ static int autoFixTarget(const vector<Key>& keys) {
     for (size_t i = 1; i < layouts.size(); i++) {
         int j = int((cur + i) % layouts.size());
         wstring t = layouts[j].text(keys);
-        // near-identical Latin layouts (QWERTY/QWERTZ/AZERTY): a typo there isn't a layout mistake.
-        // Cyrillic UK/RU differ in few keys but that's exactly what users mix up, so they're allowed.
-        size_t same = 0; for (size_t p = 0; p < t.size() && p < typed.size(); p++) same += t[p] == typed[p];
-        if (isLatin(t) && isLatin(typed) && same * 2 > keys.size()) continue;
-        if (t.size() == keys.size() && isWord(t, layouts[j].locale) && !consonantRun(t)) return j;
+        // same text in two Latin layouts (an English typo that is a Polish word): nothing to fix.
+        // Cyrillic UK/RU words spelled the same still switch the layout — that's what users mix up.
+        if (t == typed && isLatin(t)) continue;
+        if (layouts[j].maps(keys) && isWord(t, layouts[j].locale) && !consonantRun(t)) return j;
     }
     return -1;
 }
@@ -533,19 +566,20 @@ static void convertSelection(wstring text) {
     else {
         int cur = layoutIndex(fgLayout()), best = cur, bestScore = -1;
         for (size_t i = 0; i < layouts.size(); i++) {
-            int sc = 0; for (wchar_t c : text) if (IsCharAlphaW(c) && layouts[i].toKey.count(c)) sc++;
+            int sc = 0; for (wchar_t c : text) { vector<Key> k; if (IsCharAlphaW(c) && layouts[i].keysFor(c, k)) sc++; }
             if (sc > bestScore || (sc == bestScore && int(i) == cur)) { best = int(i); bestScore = sc; }
         }
         src = best;
     }
     int dst = int((src + 1) % layouts.size());
-    wstring out;
+    // runs of convertible characters go through the keys (so accents compose), the rest stays
+    wstring out; vector<Key> run;
     for (wchar_t c : text) {
-        auto k = layouts[src].toKey.find(c);
-        wchar_t r = c;
-        if (k != layouts[src].toKey.end()) { auto t = layouts[dst].toChar.find(k->second); if (t != layouts[dst].toChar.end()) r = t->second; }
-        out += r;
+        vector<Key> k;
+        if (layouts[src].keysFor(c, k) && layouts[dst].maps(k)) { run.insert(run.end(), k.begin(), k.end()); continue; }
+        out += layouts[dst].text(run) + c; run.clear();
     }
+    out += layouts[dst].text(run);
     typeText(out);
     for (wchar_t c : out) if (!IS_LOW_SURROGATE(c)) sendKey(VK_LEFT, true);  // reselect: ⇧← moves by character, not wchar_t
     lastSelOut = out; lastSelLang = dst;
@@ -584,8 +618,9 @@ static void onDoubleShift(Snapshot* s) {
     if (layouts.empty()) return;
     playSound(sndShift);
     if (!s->keys.empty()) {
+        const Layout& cur = layouts[layoutIndex(fgLayout())];
         const Layout& n = layouts[(layoutIndex(fgLayout()) + 1) % layouts.size()];
-        replaceText(int(s->keys.size()) + s->trailing, n.text(s->keys) + wstring(s->trailing, L' '));
+        replaceText(int(cur.text(s->keys).size()) + s->trailing, n.text(s->keys) + wstring(s->trailing, L' '));
         selectLayout(n);
         return;
     }
@@ -611,8 +646,9 @@ static void onAuto(Snapshot* s) {
     wstring b = layouts[j].text(s->before), bTyped = cur.text(s->before);
     bool fixBefore = s->before.size() == 1 && b != bTyped && isLetterWord(b, layouts[j].locale) && !isLetterWord(bTyped, cur.locale);
     // UK/RU word spelled the same in both layouts: text is already right, only switch the layout
-    if (fixBefore) replaceText(int(s->keys.size()) + 3, b + L" " + out + L" ");
-    else if (out != cur.text(s->keys)) replaceText(int(s->keys.size()) + 1, out + L" ");
+    int shown = int(cur.text(s->keys).size());  // on screen: accented letters are one character
+    if (fixBefore) replaceText(int(bTyped.size()) + shown + 2, b + L" " + out + L" ");
+    else if (out != cur.text(s->keys)) replaceText(shown + 1, out + L" ");
     selectLayout(layouts[j]);
     playSound(sndAuto);
 }
