@@ -169,7 +169,9 @@ static const wchar_t* L_(const wchar_t* en, const wchar_t* uk) {
 // MARK: - Layouts
 
 // caps (Caps Lock) only flips the case of letters, not digits or symbols; not part of comparison
-struct Key { BYTE vk; bool shift; bool caps = false; bool operator<(const Key& o) const { return vk != o.vk ? vk < o.vk : shift < o.shift; } bool operator==(const Key& o) const { return vk == o.vk && shift == o.shift; } };
+// sc: scan code — the physical key. Virtual-key codes differ between layouts for the same key
+// (the key right of L is VK_OEM_1 in US but VK_OEM_3 in German), so they can't be compared across layouts.
+struct Key { BYTE sc; bool shift; bool caps = false; bool operator<(const Key& o) const { return sc != o.sc ? sc < o.sc : shift < o.shift; } bool operator==(const Key& o) const { return sc == o.sc && shift == o.shift; } };
 
 static wstring normalize(const wstring& s, NORM_FORM f) {
     int n = NormalizeString(f, s.c_str(), int(s.size()), nullptr, 0);
@@ -246,15 +248,17 @@ static vector<Layout> loadLayouts() {
         bool dup = false; for (auto& o : r) if (o.locale.substr(0, 2) == L.locale.substr(0, 2)) dup = true;
         if (dup) continue;
         BYTE state[256] = {};
-        for (int vk = 0; vk < 256; vk++) {
-            if (!isLetterVk(BYTE(vk))) continue;
+        // character keys by scan code: number row, three letter rows, the extra ISO key
+        for (UINT sc = 0x02; sc <= 0x56; sc++) {
+            if (sc == 0x0E || sc == 0x0F || sc == 0x1C || sc == 0x1D || sc == 0x2A || (sc > 0x35 && sc < 0x56)) continue;
+            UINT vk = MapVirtualKeyExW(sc, MAPVK_VSC_TO_VK, list[i]);
+            if (!vk || !isLetterVk(BYTE(vk))) continue;
             for (int sh = 0; sh < 2; sh++) {
                 state[VK_SHIFT] = sh ? 0x80 : 0;
                 wchar_t buf[4];
-                UINT sc = MapVirtualKeyExW(vk, MAPVK_VK_TO_VSC, list[i]);
                 int len = ToUnicodeEx(vk, sc, state, buf, 4, 4 /* don't change kbd state */, list[i]);
                 if ((len != 1 && len != -1) || buf[0] < 0x20) continue;
-                Key k{BYTE(vk), sh != 0};
+                Key k{BYTE(sc), sh != 0};
                 L.toChar[k] = buf[0];
                 if (!L.toKey.count(buf[0])) L.toKey[buf[0]] = k;
                 if (len == -1) {  // dead key: the spacing accent (´ ΄ ¨) decomposes to space + combining marks
@@ -350,7 +354,7 @@ static LRESULT CALLBACK kbHook(int code, WPARAM wp, LPARAM lp) {
         if (trailing > 0 || !lastWord.empty()) { lastWord.clear(); trailing = 0; }
         bool shift = (GetAsyncKeyState(VK_SHIFT) & 0x8000) != 0;
         bool caps = (GetKeyState(VK_CAPITAL) & 1) != 0;
-        word.push_back({vk, shift, caps});
+        word.push_back({BYTE(k->scanCode), shift, caps});
     } else resetState();
     return CallNextHookEx(nullptr, code, wp, lp);
 }
