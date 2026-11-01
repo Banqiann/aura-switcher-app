@@ -9,7 +9,7 @@ LM_BE RCDATA "../lang/be.txt"
 LM_EL RCDATA "../lang/el.txt"
 LM_HE RCDATA "../lang/he.txt"
 LM_AR RCDATA "../lang/ar.txt"
-LM_HI RCDATA "../lang/hi.txt"
+
 LM_CS RCDATA "../lang/cs.txt"
 LM_FI RCDATA "../lang/fi.txt"
 LM_RO RCDATA "../lang/ro.txt"

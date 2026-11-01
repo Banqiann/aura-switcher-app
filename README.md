@@ -36,8 +36,8 @@ AURA uses **every layout enabled in macOS**: System Settings → Keyboard → In
 | Feature | Works with |
 |---|---|
 | Double ⇧ | any regular keyboard layout |
-| Auto-correction | Ukrainian, English, Russian, Belarusian, German, French, Spanish, Italian, Portuguese, Polish, Turkish, Dutch, Czech, Swedish, Finnish, Romanian, Hungarian, Greek, Bulgarian, Hebrew, Arabic, Hindi — with the macOS dictionary, or AURA's own language model when the dictionary isn't there |
-| Not supported | Chinese, Japanese (input via candidates, not via a layout) |
+| Auto-correction | Ukrainian, English, Russian, Belarusian, German, French, Spanish, Italian, Portuguese, Polish, Turkish, Dutch, Czech, Swedish, Finnish, Romanian, Hungarian, Greek, Bulgarian, Hebrew, Arabic — with the macOS dictionary, or AURA's own language model when the dictionary isn't there |
+| Not supported | Chinese, Japanese (input via candidates, not via a layout); auto-correction for Korean and Hindi — later |
 
 **UK ↔ RU** is corrected: "міло" → "мыло", "вібор" → "выбор". If a word is spelled the same in both layouts ("привет"), the text stays and AURA only switches the layout. Words valid in both languages ("сир", "мі") are left alone — use double ⇧ for those.
 

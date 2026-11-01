@@ -23,6 +23,7 @@
 #include <atomic>
 #include <ctime>
 #include <map>
+#include <set>
 #include <memory>
 #include <unordered_map>
 #include <unordered_set>
@@ -424,10 +425,12 @@ static bool dictionaryWorks(const wstring& locale) {
     for (auto& l : layouts) {
         if (!r) break;
         if (l.locale != locale) continue;
-        for (const char* codes : {"QXQXQXQ", "ZZZZZZZ"}) {
-            vector<Key> keys; for (const char* c = codes; *c; c++) keys.push_back({BYTE(*c), false});
-            wstring w = l.text(keys);
-            if (w.size() == keys.size() && spell(w, locale)) r = false;
+        // nonsense from the layout's own letters (keys like Q or Z may type several characters elsewhere)
+        std::set<wchar_t> set; for (auto& kv : l.toChar) if (IsCharAlphaW(kv.second)) set.insert(kv.second);
+        vector<wchar_t> letters(set.begin(), set.end());
+        if (letters.size() >= 3) {
+            wstring a(7, letters[0]), b; for (int i = 0; i < 7; i++) b += letters[1 + i % 2];
+            if (spell(a, locale) || spell(b, locale)) r = false;
         }
         break;
     }

@@ -441,9 +441,10 @@ final class Engine {
         // no dictionary at all (Belarusian): not "works" — the language model takes over
         var r = NSSpellChecker.shared.availableLanguages.contains { $0.hasPrefix(lang) }
         if r, let l = layouts.first(where: { $0.lang == lang }) {
-            for codes: [UInt16] in [[12, 7, 12, 7, 12, 7, 12], [6, 6, 6, 6, 6, 6, 6]] {  // qxqxqxq, zzzzzzz
-                let w = l.text(codes.map { Key(code: $0, shift: false) })
-                if w.count == codes.count, spell(w, lang) { r = false }
+            // nonsense from the layout's own letters (keys like Q or Z may type several characters elsewhere)
+            let letters = Array(Set(l.toChar.values.filter(\.isLetter))).sorted()
+            if letters.count >= 3 {
+                for w in [String(repeating: letters[0], count: 7), String((0..<7).map { letters[1 + $0 % 2] })] where spell(w, lang) { r = false }
             }
         }
         reliable[lang] = r
