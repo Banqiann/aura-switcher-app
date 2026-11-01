@@ -16,8 +16,8 @@ LM_RO RCDATA "../lang/ro.txt"
 LM_HU RCDATA "../lang/hu.txt"
 
 1 VERSIONINFO
-FILEVERSION 0,7,1,0
-PRODUCTVERSION 0,7,1,0
+FILEVERSION 0,8,0,0
+PRODUCTVERSION 0,8,0,0
 BEGIN
   BLOCK "StringFileInfo"
   BEGIN
@@ -26,8 +26,8 @@ BEGIN
       VALUE "CompanyName", "Made in Ukraine"
       VALUE "FileDescription", "AURA Switcher — keyboard layout fixer"
       VALUE "ProductName", "AURA Switcher"
-      VALUE "ProductVersion", "0.7.2 beta"
-      VALUE "FileVersion", "0.7.2"
+      VALUE "ProductVersion", "0.8 beta"
+      VALUE "FileVersion", "0.8"
       VALUE "LegalCopyright", "Oleksii Chernov, Ukraine"
     END
   END
