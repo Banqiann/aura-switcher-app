@@ -409,28 +409,15 @@ final class Engine {
     func convertSelection(_ text: String) {
         guard !layouts.isEmpty else { return }
         var srcIdx: Int
-        let again = text == lastSelOut && lastSelLang < layouts.count
-        if again { srcIdx = lastSelLang } else {
+        if text == lastSelOut, lastSelLang < layouts.count { srcIdx = lastSelLang } else {
             let cur = index(currentLang())
             let scores = layouts.map { l in text.filter { l.toKey[$0] != nil && $0.isLetter }.count }
             srcIdx = scores.indices.max { a, b in
                 scores[a] != scores[b] ? scores[a] < scores[b] : (a != cur && b == cur)
             } ?? cur
         }
-        let srcL = layouts[srcIdx]
-        func conv(_ d: Int) -> String { String(text.map { c in srcL.toKey[c].flatMap { layouts[d].toChar[$0] } ?? c }) }
-        // with 3+ layouts the next one isn't always right (EN → RU for Ukrainian text): first pick the layout
-        // where most words are real; pressing again on the result keeps cycling in order
-        var dstIdx = (srcIdx + 1) % layouts.count
-        if !again, layouts.count > 2 {
-            let scores = (1..<layouts.count).map { i -> (Int, Int) in
-                let d = (srcIdx + i) % layouts.count
-                let words = conv(d).split { !$0.isLetter && $0 != "'" && $0 != "-" }.prefix(20)
-                return (d, words.filter { isWord(String($0), layouts[d].lang) }.count)
-            }
-            if let best = scores.max(by: { $0.1 < $1.1 }), best.1 > 0 { dstIdx = best.0 }
-        }
-        let dst = layouts[dstIdx], out = conv(dstIdx)
+        let srcL = layouts[srcIdx], dstIdx = (srcIdx + 1) % layouts.count, dst = layouts[dstIdx]
+        let out = String(text.map { c in srcL.toKey[c].flatMap { dst.toChar[$0] } ?? c })
         typeText(out)
         for _ in 0..<out.count { postKey(123, flags: .maskShift) } // reselect (⇧← moves by character)
         lastSelOut = out; lastSelLang = dstIdx

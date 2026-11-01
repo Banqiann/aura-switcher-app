@@ -483,8 +483,7 @@ static void convertSelection(wstring text) {
     // clipboard line breaks are \r\n; typed as two characters they become two line breaks
     for (size_t i; (i = text.find(L"\r\n")) != wstring::npos;) text.erase(i, 1);
     int src;
-    bool again = text == lastSelOut && lastSelLang < int(layouts.size());
-    if (again) src = lastSelLang;
+    if (text == lastSelOut && lastSelLang < int(layouts.size())) src = lastSelLang;
     else {
         int cur = layoutIndex(fgLayout()), best = cur, bestScore = -1;
         for (size_t i = 0; i < layouts.size(); i++) {
@@ -493,33 +492,14 @@ static void convertSelection(wstring text) {
         }
         src = best;
     }
-    auto conv = [&](int d) {
-        wstring o;
-        for (wchar_t c : text) {
-            auto k = layouts[src].toKey.find(c);
-            wchar_t r = c;
-            if (k != layouts[src].toKey.end()) { auto t = layouts[d].toChar.find(k->second); if (t != layouts[d].toChar.end()) r = t->second; }
-            o += r;
-        }
-        return o;
-    };
-    // with 3+ layouts the next one isn't always right (EN → RU for Ukrainian text): first pick the layout
-    // where most words are real; pressing again on the result keeps cycling in order
     int dst = int((src + 1) % layouts.size());
-    if (!again && layouts.size() > 2) {
-        int bestScore = 0;
-        for (size_t i = 1; i < layouts.size(); i++) {
-            int d = int((src + i) % layouts.size()), sc = 0, n = 0;
-            wstring o = conv(d), w;
-            for (size_t p = 0; p <= o.size() && n < 20; p++) {
-                wchar_t c = p < o.size() ? o[p] : L' ';
-                if (IsCharAlphaW(c) || c == L'\'' || c == L'-') { w += c; continue; }
-                if (!w.empty()) { n++; sc += isWord(w, layouts[d].locale); w.clear(); }
-            }
-            if (sc > bestScore) { bestScore = sc; dst = d; }
-        }
+    wstring out;
+    for (wchar_t c : text) {
+        auto k = layouts[src].toKey.find(c);
+        wchar_t r = c;
+        if (k != layouts[src].toKey.end()) { auto t = layouts[dst].toChar.find(k->second); if (t != layouts[dst].toChar.end()) r = t->second; }
+        out += r;
     }
-    wstring out = conv(dst);
     typeText(out);
     for (wchar_t c : out) if (!IS_LOW_SURROGATE(c)) sendKey(VK_LEFT, true);  // reselect: ⇧← moves by character, not wchar_t
     lastSelOut = out; lastSelLang = dst;
