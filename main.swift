@@ -354,9 +354,20 @@ final class Engine {
 
     // MARK: auto detection
 
+    // the spell checker takes any two letters for a word (":D" → «ЖВ», "in" → «шт»): only common ones count
+    static let twoLetterWords: [String: Set<String>] = [
+        "uk": ["як", "що", "не", "та", "до", "на", "за", "по", "ти", "ми", "ви", "їх", "це", "її", "ще", "бо", "чи", "ні",
+               "де", "то", "ну", "ой", "аж", "би", "зі", "із", "ця", "ці", "ті", "ок"],
+        "ru": ["не", "на", "по", "за", "до", "от", "из", "во", "ко", "то", "же", "бы", "ли", "мы", "вы", "он", "её", "их",
+               "да", "но", "ни", "уж", "ой", "ну", "ах", "ох", "со", "об", "ты", "та", "те", "эй", "ок"],
+        "en": ["is", "in", "on", "at", "to", "it", "he", "we", "me", "my", "of", "or", "an", "as", "be", "by", "do", "go",
+               "if", "no", "so", "up", "us", "am", "hi", "ok", "oh", "ah", "ha", "eh", "yo"]]
+
     func isWord(_ s: String, _ lang: String) -> Bool {
-        let w = s.trimmingCharacters(in: .punctuationCharacters.union(.symbols))
+        var w = s.trimmingCharacters(in: .punctuationCharacters.union(.symbols))
         guard w.count >= 2, w.allSatisfy(\.isLetter) || w.contains("'") || w.contains("-") else { return false }
+        if w.count == 2, let set = Engine.twoLetterWords[lang] { return set.contains(w.lowercased()) }
+        if w == w.uppercased() { w = w.lowercased() }  // all caps passes any spell check
         let checker = NSSpellChecker.shared
         guard let l = checker.availableLanguages.first(where: { $0.hasPrefix(lang) }) else { return false }
         return checker.checkSpelling(of: w, startingAt: 0, language: l, wrap: false,

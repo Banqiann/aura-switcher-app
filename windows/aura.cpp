@@ -365,9 +365,19 @@ static ISpellChecker* checkerFor(const wstring& locale) {
     checkers[locale] = c;
     return c;
 }
-static bool isWord(const wstring& w, const wstring& locale) {
+// the spell checker takes any two letters for a word (":D" → «ЖВ»): only common ones count
+static bool isWord(wstring w, const wstring& locale) {
+    static const std::map<wstring, wstring> two = {
+        {L"uk", L" як що не та до на за по ти ми ви їх це її ще бо чи ні де то ну ой аж би зі із ця ці ті ок "},
+        {L"ru", L" не на по за до от из во ко то же бы ли мы вы он её их да но ни уж ой ну ах ох со об ты та те эй ок "},
+        {L"en", L" is in on at to it he we me my of or an as be by do go if no so up us am hi ok oh ah ha eh yo "}};
     if (w.size() < 2) return false;
     for (wchar_t c : w) if (!IsCharAlphaW(c) && c != L'\'' && c != L'-') return false;
+    wstring low = w; CharLowerBuffW(&low[0], DWORD(low.size()));
+    auto t = two.find(locale.substr(0, 2));
+    if (w.size() == 2 && t != two.end()) return t->second.find(L" " + low + L" ") != wstring::npos;
+    wstring up = w; CharUpperBuffW(&up[0], DWORD(up.size()));
+    if (w == up) w = low;  // all caps passes any spell check
     ISpellChecker* c = checkerFor(locale);
     if (!c) return false;
     IEnumSpellingError* errs = nullptr;
