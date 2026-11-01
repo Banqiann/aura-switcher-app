@@ -200,6 +200,8 @@ function setLang(l) {
   document.documentElement.lang = l; document.documentElement.dir = T[l].dir || "ltr"; document.title = T[l].title;
   const desc = document.querySelector('meta[name="description"]'); if (desc && T[l].desc) desc.content = T[l].desc;
   document.querySelectorAll("[data-t]").forEach(e => e.innerHTML = T[l][e.dataset.t]);
+  // "ARM64" in the Windows card links to the ARM64 build (buttons give x64)
+  const pw = document.querySelector('[data-t="pWin"] li'); if (pw) pw.innerHTML = pw.innerHTML.replace("ARM64", '<a href="https://github.com/klbk/aura-switcher/releases/latest/download/AURA-Switcher-windows-arm64.zip">ARM64</a>');
   const name = document.getElementById("langName"); if (name) name.textContent = T[l].name;
   document.querySelectorAll(".langlist button").forEach(b => b.classList.toggle("on", b.dataset.l === l));
 }
