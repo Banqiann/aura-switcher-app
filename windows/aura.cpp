@@ -365,6 +365,37 @@ static ISpellChecker* checkerFor(const wstring& locale) {
     checkers[locale] = c;
     return c;
 }
+static bool spell(const wstring& w, const wstring& locale) {
+    ISpellChecker* c = checkerFor(locale);
+    if (!c) return false;
+    IEnumSpellingError* errs = nullptr;
+    if (FAILED(c->Check(w.c_str(), &errs)) || !errs) return false;
+    ISpellingError* e = nullptr;
+    bool clean = errs->Next(&e) != S_OK;
+    if (e) e->Release();
+    errs->Release();
+    return clean;
+}
+
+// a dictionary that accepts nonsense typed in its own layout can't tell words apart:
+// English typos would turn into gibberish in that language. Checked once per language.
+static std::map<wstring, bool> reliable;
+static bool dictionaryWorks(const wstring& locale) {
+    auto it = reliable.find(locale);
+    if (it != reliable.end()) return it->second;
+    bool r = true;
+    for (auto& l : layouts) {
+        if (l.locale != locale) continue;
+        for (const char* codes : {"QXQXQXQ", "ZZZZZZZ"}) {
+            vector<Key> keys; for (const char* c = codes; *c; c++) keys.push_back({BYTE(*c), false});
+            wstring w = l.text(keys);
+            if (w.size() == keys.size() && spell(w, locale)) r = false;
+        }
+        break;
+    }
+    return reliable[locale] = r;
+}
+
 // the spell checker takes any two letters for a word (":D" → «ЖВ»): only common ones count
 static bool isWord(wstring w, const wstring& locale) {
     static const std::map<wstring, wstring> two = {
@@ -378,15 +409,7 @@ static bool isWord(wstring w, const wstring& locale) {
     if (w.size() == 2 && t != two.end()) return t->second.find(L" " + low + L" ") != wstring::npos;
     wstring up = w; CharUpperBuffW(&up[0], DWORD(up.size()));
     if (w == up) w = low;  // all caps passes any spell check
-    ISpellChecker* c = checkerFor(locale);
-    if (!c) return false;
-    IEnumSpellingError* errs = nullptr;
-    if (FAILED(c->Check(w.c_str(), &errs)) || !errs) return false;
-    ISpellingError* e = nullptr;
-    bool clean = errs->Next(&e) != S_OK;
-    if (e) e->Release();
-    errs->Release();
-    return clean;
+    return dictionaryWorks(locale) && spell(w, locale);
 }
 
 // five Cyrillic consonants in a row: gibberish the spell checker let through ("brachii," → «икфсршшб»)
@@ -404,11 +427,12 @@ static bool isLatin(const wstring& s) { for (wchar_t c : s) if (c >= 0x250) retu
 
 // The first spell check in a language loads its dictionary (can take a moment). If that happens
 // while the user types on, the correction is skipped — so load all dictionaries up front.
-static void warmUpDictionaries() { for (auto& l : layouts) isWord(L"aura", l.locale); }
+static void warmUpDictionaries() { reliable.clear(); for (auto& l : layouts) isWord(L"aura", l.locale); }
 
 static int autoFixTarget(const vector<Key>& keys) {
     if (keys.size() < 2 || layouts.empty()) return -1;
     int cur = layoutIndex(fgLayout());
+    if (!dictionaryWorks(layouts[cur].locale)) return -1;  // typed in a language we can't check: may well be right
     wstring typed = layouts[cur].text(keys);
     if (S.isUserWord(typed) || isWord(typed, layouts[cur].locale)) return -1;
     for (size_t i = 1; i < layouts.size(); i++) {

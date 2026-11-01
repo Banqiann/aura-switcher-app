@@ -248,7 +248,7 @@ final class Engine {
 
     /// The first spell check in a language loads its dictionary (can take a moment). If that happens
     /// while the user types on, the correction is skipped — so load all dictionaries up front.
-    func warmUpDictionaries() { for l in layouts { _ = isWord("aura", l.lang) } }
+    func warmUpDictionaries() { reliable = [:]; for l in layouts { _ = isWord("aura", l.lang) } }
 
     // MARK: tap
 
@@ -368,10 +368,30 @@ final class Engine {
         guard w.count >= 2, w.allSatisfy(\.isLetter) || w.contains("'") || w.contains("-") else { return false }
         if w.count == 2, let set = Engine.twoLetterWords[lang] { return set.contains(w.lowercased()) }
         if w == w.uppercased() { w = w.lowercased() }  // all caps passes any spell check
+        return dictionaryWorks(lang) && spell(w, lang)
+    }
+
+    func spell(_ w: String, _ lang: String) -> Bool {
         let checker = NSSpellChecker.shared
         guard let l = checker.availableLanguages.first(where: { $0.hasPrefix(lang) }) else { return false }
         return checker.checkSpelling(of: w, startingAt: 0, language: l, wrap: false,
                                      inSpellDocumentWithTag: 0, wordCount: nil).location == NSNotFound
+    }
+
+    /// A language whose dictionary macOS hasn't downloaded (not a system language) accepts any string:
+    /// English typos would turn into gibberish in it. Checked once per language on nonsense typed in its layout.
+    var reliable: [String: Bool] = [:]
+    func dictionaryWorks(_ lang: String) -> Bool {
+        if let r = reliable[lang] { return r }
+        var r = true
+        if let l = layouts.first(where: { $0.lang == lang }) {
+            for codes: [UInt16] in [[12, 7, 12, 7, 12, 7, 12], [6, 6, 6, 6, 6, 6, 6]] {  // qxqxqxq, zzzzzzz
+                let w = l.text(codes.map { Key(code: $0, shift: false) })
+                if w.count == codes.count, spell(w, lang) { r = false }
+            }
+        }
+        reliable[lang] = r
+        return r
     }
 
     /// five Cyrillic consonants in a row: gibberish the spell checker let through ("brachii," → «икфсршшб»)
@@ -395,7 +415,8 @@ final class Engine {
     }
 
     func autoFix(_ keys: [Key]) -> Layout? {
-        guard keys.count >= 2, let cur = typedLayout(keys) else { return nil }
+        // typed in a language we can't check: it may well be right — leave it
+        guard keys.count >= 2, let cur = typedLayout(keys), dictionaryWorks(cur.lang) else { return nil }
         let typed = cur.text(keys)
         if settings.words.contains(typed.lowercased()) || isWord(typed, cur.lang) { return nil }
         let start = index(cur.lang)
