@@ -13,6 +13,7 @@
 #define _UNICODE
 #endif
 #include <windows.h>
+#include <appmodel.h>
 #include <shellapi.h>
 #include <objbase.h>
 #include <spellcheck.h>
@@ -93,7 +94,14 @@ static Settings S;
 // after the last check) the menu and the tray icon remind that a newer version may be out.
 static const long long kUpdateNudgeDays = 30;
 static long long updateChecked = wcstoll(regGet(L"updateChecked", L"0").c_str(), nullptr, 10);  // last opened the releases page
+// installed from the Microsoft Store (MSIX package): the Store updates it and starts it at login
+static bool packaged() {
+    static int r = -1;
+    if (r < 0) { UINT32 n = 0; r = GetCurrentPackageFullName(&n, nullptr) != APPMODEL_ERROR_NO_PACKAGE; }
+    return r == 1;
+}
 static bool updateDue() {
+    if (packaged()) return false;
     long long since = std::max<long long>(BUILD_TIME, updateChecked);
     return since > 0 && (long long)time(nullptr) - since > kUpdateNudgeDays * 86400;
 }
@@ -985,17 +993,18 @@ static void showMenu() {
     AppendMenuW(m, MF_POPUP, (UINT_PTR)bm, L_(L"Language bindings", L"Прив'язки мов"));
     AppendMenuW(m, MF_SEPARATOR, 0, nullptr);
 
-    item(m, ID_LOGIN, L_(L"Launch at login", L"Запускати під час входу"), loginEnabled());
+    // Store version: login start is the package's startup task, switched in Windows Settings → Apps → Startup
+    item(m, ID_LOGIN, L_(L"Launch at login", L"Запускати під час входу"), packaged() || loginEnabled());
     item(m, ID_WORDS, L_(L"Word exceptions…", L"Слова-винятки…"));
     HMENU um = CreatePopupMenu();
     item(um, ID_UI_SYS, L_(L"System", L"Системна"), S.uiLang.empty());
     for (int i = 0; i < UI_N; i++) item(um, UINT(ID_UI0 + i), UI_NAMES[i], S.uiLang == UI_LANGS[i]);
     AppendMenuW(m, MF_POPUP, (UINT_PTR)um, L_(L"Menu language", L"Мова меню"));
     item(m, 0, L_(L"Double ⇧ — convert word/selection", L"Подвійний ⇧ — змінити мову слова/виділення"), false, false);
-    item(m, ID_UPDATE, updateDue() ? L_(L"⬆︎ An update may be available — check", L"⬆︎ Можливо, вийшло оновлення — перевірити")
+    if (!packaged()) item(m, ID_UPDATE, updateDue() ? L_(L"⬆︎ An update may be available — check", L"⬆︎ Можливо, вийшло оновлення — перевірити")
                                    : L_(L"Check for updates…", L"Перевірити оновлення…"));
     item(m, ID_REPORT, L_(L"Report a problem…", L"Повідомити про проблему…"));
-    item(m, ID_DONATE, L_(L"Support AURA Switcher ☕", L"Підтримати AURA Switcher ☕"));
+    if (!packaged()) item(m, ID_DONATE, L_(L"Support AURA Switcher ☕", L"Підтримати AURA Switcher ☕"));  // Store: no outside payment links
     item(m, 0, L"AURA Switcher " APP_VERSION L" beta · 🇺🇦", false, false);
     item(m, ID_QUIT, L_(L"Quit", L"Вихід"));
 
@@ -1015,7 +1024,10 @@ static void showMenu() {
         wstring d = menuExDel[cmd - ID_EXDEL0]; vector<wstring> r; for (auto& e : S.excluded) if (e != d) r.push_back(e); S.excluded = r;
     }
     else if (cmd >= ID_BDDEL0 && cmd < ID_BDDEL0 + menuBdDel.size()) S.bindings.erase(menuBdDel[cmd - ID_BDDEL0]);
-    else if (cmd == ID_LOGIN) setLogin(!loginEnabled());
+    else if (cmd == ID_LOGIN) {
+        if (packaged()) ShellExecuteW(nullptr, L"open", L"ms-settings:startupapps", nullptr, nullptr, SW_SHOWNORMAL);
+        else setLogin(!loginEnabled());
+    }
     else if (cmd == ID_WORDS) editWords();
     else if (cmd == ID_REPORT) reportProblem();
     else if (cmd == ID_UPDATE) {
@@ -1145,7 +1157,7 @@ int WINAPI wWinMain(HINSTANCE inst, HINSTANCE, PWSTR, int) {
     layouts = loadLayouts();
     disableStickyPrompt();
     warmUpDictionaries();
-    if (regGet(L"loginSet", L"") != L"1") { setLogin(true); regSet(L"loginSet", L"1"); }
+    if (!packaged() && regGet(L"loginSet", L"") != L"1") { setLogin(true); regSet(L"loginSet", L"1"); }
 
     nid.cbSize = sizeof(nid); nid.hWnd = hwndMain; nid.uID = 1;
     nid.uFlags = NIF_ICON | NIF_TIP | NIF_MESSAGE; nid.uCallbackMessage = WM_TRAY;

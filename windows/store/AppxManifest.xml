@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Microsoft Store package. Identity values come from Partner Center (Product identity) via identity.env; pack.sh fills them in. -->
+<Package xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
+         xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
+         xmlns:desktop="http://schemas.microsoft.com/appx/manifest/desktop/windows10"
+         xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities"
+         IgnorableNamespaces="uap desktop rescap">
+  <Identity Name="@NAME@" Publisher="@PUBLISHER@" Version="@VERSION@" ProcessorArchitecture="@ARCH@"/>
+  <Properties>
+    <DisplayName>AURA Switcher</DisplayName>
+    <PublisherDisplayName>@PUBLISHER_NAME@</PublisherDisplayName>
+    <Logo>Assets\StoreLogo.png</Logo>
+  </Properties>
+  <Dependencies>
+    <TargetDeviceFamily Name="Windows.Desktop" MinVersion="10.0.17763.0" MaxVersionTested="10.0.26100.0"/>
+  </Dependencies>
+  <Resources>
+    <Resource Language="en-us"/><Resource Language="uk-ua"/>
+  </Resources>
+  <Applications>
+    <Application Id="AURA" Executable="AURA Switcher.exe" EntryPoint="Windows.FullTrustApplication">
+      <uap:VisualElements DisplayName="AURA Switcher" Description="Fixes text typed in the wrong keyboard layout"
+                          BackgroundColor="transparent" Square150x150Logo="Assets\Square150x150Logo.png" Square44x44Logo="Assets\Square44x44Logo.png">
+        <uap:DefaultTile Wide310x150Logo="Assets\Wide310x150Logo.png"/>
+      </uap:VisualElements>
+      <Extensions>
+        <!-- start at login (on by default after the first launch; the user switches it in Settings → Apps → Startup) -->
+        <desktop:Extension Category="windows.startupTask" Executable="AURA Switcher.exe" EntryPoint="Windows.FullTrustApplication">
+          <desktop:StartupTask TaskId="AURAStartup" Enabled="true" DisplayName="AURA Switcher"/>
+        </desktop:Extension>
+      </Extensions>
+    </Application>
+  </Applications>
+  <Capabilities>
+    <rescap:Capability Name="runFullTrust"/>
+  </Capabilities>
+</Package>
