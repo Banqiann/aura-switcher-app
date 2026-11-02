@@ -2,6 +2,7 @@
 # Builds the Microsoft Store package: dist/AURA-Switcher-<version>.msixbundle (x64 + ARM64), unsigned — the Store signs it.
 # Needs Windows (makeappx from the Windows SDK) and Zig; runs in CI (.github/workflows/store.yml).
 set -euo pipefail
+export MSYS_NO_PATHCONV=1  # Git Bash would turn makeappx options like /o into paths
 cd "$(dirname "$0")"
 VERSION=$(grep -m1 '^VERSION=' ../build.sh | cut -d= -f2)
 source identity.env
