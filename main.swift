@@ -196,16 +196,17 @@ func parseWords(_ s: String) -> [String] {
 // MARK: - Sounds (synthesized, identical on Mac and Windows)
 
 enum Sounds {
-    /// Short soft sine blips: one tone for auto-correction, two rising tones for double ⇧.
+    /// A short quiet "tick" (fast attack, quick decay) for auto-correction, two rising ticks for double ⇧ —
+    /// soft enough to stop noticing after a while.
     static func blip(_ freqs: [Double]) -> Data {
-        let rate = 44100, toneLen = rate * 45 / 1000, gap = rate * 25 / 1000
+        let rate = 44100, toneLen = rate * 50 / 1000, gap = rate * 30 / 1000
         var pcm: [Int16] = []
         for (i, f) in freqs.enumerated() {
             if i > 0 { pcm += [Int16](repeating: 0, count: gap) }
             for n in 0..<toneLen {
                 let t = Double(n) / Double(rate)
-                let env = min(1, Double(n) / 200) * min(1, Double(toneLen - n) / 800)  // no clicks
-                pcm.append(Int16(sin(2 * .pi * f * t) * env * 0.22 * 32767))
+                let env = min(1, Double(n) / 40) * exp(-Double(n) / (Double(rate) * 0.012))  // no click, ~12 ms decay
+                pcm.append(Int16(sin(2 * .pi * f * t) * env * 0.12 * 32767))
             }
         }
         var d = Data()
@@ -217,8 +218,8 @@ enum Sounds {
         pcm.withUnsafeBufferPointer { d.append(Data(buffer: $0)) }
         return d
     }
-    static let auto = NSSound(data: blip([1175]))
-    static let shift = NSSound(data: blip([880, 1320]))
+    static let auto = NSSound(data: blip([1568]))
+    static let shift = NSSound(data: blip([1318, 1760]))
     static func play(_ s: NSSound?) {
         guard engine.settings.sound, let s else { return }
         s.stop(); s.play()
@@ -245,9 +246,9 @@ let uiStrings: [String: [String]] = [ // key: one string per uiLangs
     "bindings": ["Language bindings", "Прив'язки мов", "Przypisania języków", "Sprachzuordnungen", "Idiomas asignados", "Langues associées", "Lingue associate", "Idiomas associados", "Dil atamaları", "Taalkoppelingen", "Přiřazení jazyků", "Språkkopplingar", "Kieliliitokset", "Limbi asociate", "Nyelvi hozzárendelések", "Αντιστοιχίσεις γλωσσών", "Обвързани езици", "שיוכי שפה", "ربط اللغات", "भाषा बंधन", "언어 지정"],
     "empty": ["Empty", "Порожньо", "Pusto", "Leer", "Vacío", "Vide", "Vuoto", "Vazio", "Boş", "Leeg", "Prázdné", "Tomt", "Tyhjä", "Gol", "Üres", "Κενό", "Празно", "ריק", "فارغ", "खाली", "비어 있음"],
     "login": ["Launch at login", "Запускати під час входу", "Uruchamiaj przy logowaniu", "Bei Anmeldung starten", "Abrir al iniciar sesión", "Ouvrir à la connexion", "Apri al login", "Abrir ao iniciar sessão", "Oturum açılışında başlat", "Starten bij inloggen", "Spouštět po přihlášení", "Starta vid inloggning", "Käynnistä kirjautuessa", "Pornește la autentificare", "Indítás bejelentkezéskor", "Εκκίνηση κατά τη σύνδεση", "Стартиране при вход", "הפעלה בעת התחברות", "التشغيل عند تسجيل الدخول", "लॉगिन पर शुरू करें", "로그인 시 실행"],
-    "words": ["Word exceptions…", "Слова-винятки…", "Wyjątki słów…", "Wortausnahmen…", "Palabras excluidas…", "Mots exclus…", "Parole escluse…", "Palavras excluídas…", "Kelime istisnaları…", "Woorduitzonderingen…", "Výjimky slov…", "Ordundantag…", "Sanapoikkeukset…", "Cuvinte excluse…", "Szókivételek…", "Εξαιρέσεις λέξεων…", "Думи-изключения…", "מילים חריגות…", "كلمات مستثناة…", "शब्द अपवाद…", "예외 단어…"],
-    "wordsTitle": ["AURA Switcher — word exceptions", "AURA Switcher — слова-винятки", "AURA Switcher — wyjątki słów", "AURA Switcher — Wortausnahmen", "AURA Switcher — palabras excluidas", "AURA Switcher — mots exclus", "AURA Switcher — parole escluse", "AURA Switcher — palavras excluídas", "AURA Switcher — kelime istisnaları", "AURA Switcher — woorduitzonderingen", "AURA Switcher — výjimky slov", "AURA Switcher — ordundantag", "AURA Switcher — sanapoikkeukset", "AURA Switcher — cuvinte excluse", "AURA Switcher — szókivételek", "AURA Switcher — εξαιρέσεις λέξεων", "AURA Switcher — думи-изключения", "AURA Switcher — מילים חריגות", "AURA Switcher — كلمات مستثناة", "AURA Switcher — शब्द अपवाद", "AURA Switcher — 예외 단어"],
-    "wordsInfo": ["AURA Switcher will never auto-correct these words. Separate them with commas.", "Ці слова AURA Switcher ніколи не виправлятиме автоматично. Через кому.", "AURA Switcher nigdy nie poprawi automatycznie tych słów. Oddziel je przecinkami.", "Diese Wörter korrigiert AURA Switcher nie automatisch. Durch Kommas trennen.", "AURA Switcher nunca corregirá estas palabras automáticamente. Sepáralas con comas.", "AURA Switcher ne corrigera jamais ces mots automatiquement. Séparez-les par des virgules.", "AURA Switcher non correggerà mai automaticamente queste parole. Separale con virgole.", "O AURA Switcher nunca corrigirá estas palavras automaticamente. Separe-as com vírgulas.", "AURA Switcher bu kelimeleri asla otomatik düzeltmez. Virgülle ayırın.", "AURA Switcher corrigeert deze woorden nooit automatisch. Scheid ze met komma's.", "Tato slova AURA Switcher nikdy automaticky neopraví. Oddělte je čárkami.", "AURA Switcher rättar aldrig dessa ord automatiskt. Separera med kommatecken.", "AURA Switcher ei koskaan korjaa näitä sanoja automaattisesti. Erota pilkuilla.", "AURA Switcher nu va corecta niciodată automat aceste cuvinte. Separați-le prin virgulă.", "Ezeket a szavakat az AURA Switcher soha nem javítja automatikusan. Vesszővel válassza el.", "Το AURA Switcher δεν θα διορθώνει ποτέ αυτόματα αυτές τις λέξεις. Χωρίστε τις με κόμμα.", "AURA Switcher никога няма да поправя автоматично тези думи. Разделете ги със запетая.", "AURA Switcher לעולם לא יתקן מילים אלה אוטומטית. הפרידו בפסיקים.", "لن يصحح AURA Switcher هذه الكلمات تلقائيًا أبدًا. افصل بينها بفواصل.", "AURA Switcher इन शब्दों को कभी अपने आप नहीं सुधारेगा। अल्पविराम से अलग करें।", "AURA Switcher는 이 단어들을 자동으로 수정하지 않습니다. 쉼표로 구분하세요."],
+    "words": ["My words…", "Мої слова…", "Moje słowa…", "Meine Wörter…", "Mis palabras…", "Mes mots…", "Le mie parole…", "As minhas palavras…", "Kelimelerim…", "Mijn woorden…", "Moje slova…", "Mina ord…", "Omat sanat…", "Cuvintele mele…", "Saját szavak…", "Οι λέξεις μου…", "Моите думи…", "המילים שלי…", "كلماتي…", "मेरे शब्द…", "내 단어…"],
+    "wordsTitle": ["AURA Switcher — my words", "AURA Switcher — мої слова", "AURA Switcher — moje słowa", "AURA Switcher — meine Wörter", "AURA Switcher — mis palabras", "AURA Switcher — mes mots", "AURA Switcher — le mie parole", "AURA Switcher — as minhas palavras", "AURA Switcher — kelimelerim", "AURA Switcher — mijn woorden", "AURA Switcher — moje slova", "AURA Switcher — mina ord", "AURA Switcher — omat sanat", "AURA Switcher — cuvintele mele", "AURA Switcher — saját szavak", "AURA Switcher — οι λέξεις μου", "AURA Switcher — моите думи", "AURA Switcher — המילים שלי", "AURA Switcher — كلماتي", "AURA Switcher — मेरे शब्द", "AURA Switcher — 내 단어"],
+    "wordsInfo": ["AURA Switcher treats these words as correct: it never changes them, and fixes them when typed in the wrong layout. Separate them with commas.", "Ці слова AURA Switcher вважає правильними: не змінює їх, а набрані не в тій розкладці — виправляє на них. Через кому.", "AURA Switcher uznaje te słowa za poprawne: nigdy ich nie zmienia, a wpisane w złym układzie poprawia na nie. Oddziel je przecinkami.", "AURA Switcher hält diese Wörter für richtig: ändert sie nie und korrigiert sie, wenn sie im falschen Layout getippt wurden. Durch Kommas trennen.", "AURA Switcher considera correctas estas palabras: nunca las cambia y las corrige si se escriben con la distribución equivocada. Sepáralas con comas.", "AURA Switcher considère ces mots comme corrects : il ne les modifie jamais et les corrige s'ils sont tapés avec la mauvaise disposition. Séparez-les par des virgules.", "AURA Switcher considera corrette queste parole: non le cambia mai e le corregge se digitate con il layout sbagliato. Separale con virgole.", "O AURA Switcher considera estas palavras corretas: nunca as altera e corrige-as se forem digitadas no layout errado. Separe-as com vírgulas.", "AURA Switcher bu kelimeleri doğru kabul eder: asla değiştirmez, yanlış düzende yazılırsa onlara düzeltir. Virgülle ayırın.", "AURA Switcher beschouwt deze woorden als juist: verandert ze nooit en verbetert ze als ze in de verkeerde indeling zijn getypt. Scheid ze met komma's.", "AURA Switcher považuje tato slova za správná: nikdy je nemění a opraví je, když jsou napsána ve špatném rozložení. Oddělte je čárkami.", "AURA Switcher ser dessa ord som rätt: ändrar dem aldrig och rättar dem om de skrivs med fel layout. Separera med kommatecken.", "AURA Switcher pitää näitä sanoja oikeina: ei koskaan muuta niitä ja korjaa ne, jos ne on kirjoitettu väärällä asettelulla. Erota pilkuilla.", "AURA Switcher consideră aceste cuvinte corecte: nu le schimbă niciodată și le corectează dacă sunt tastate în aranjamentul greșit. Separați-le prin virgulă.", "Az AURA Switcher ezeket a szavakat helyesnek tekinti: soha nem módosítja őket, és kijavítja, ha rossz kiosztással gépelték. Vesszővel válassza el.", "Το AURA Switcher θεωρεί σωστές αυτές τις λέξεις: δεν τις αλλάζει ποτέ και τις διορθώνει όταν πληκτρολογηθούν με λάθος διάταξη. Χωρίστε τις με κόμμα.", "AURA Switcher смята тези думи за правилни: никога не ги променя и ги поправя, ако са написани с грешната подредба. Разделете ги със запетая.", "AURA Switcher מתייחס למילים אלה כנכונות: לעולם לא משנה אותן, ומתקן אליהן כשהן מוקלדות בפריסה הלא נכונה. הפרידו בפסיקים.", "يعدّ AURA Switcher هذه الكلمات صحيحة: لا يغيّرها أبدًا، ويصحّحها إليها إذا كُتبت بالتخطيط الخطأ. افصل بينها بفواصل.", "AURA Switcher इन शब्दों को सही मानता है: इन्हें कभी नहीं बदलता, और गलत लेआउट में टाइप होने पर इन्हीं में सुधार देता है। अल्पविराम से अलग करें।", "AURA Switcher는 이 단어들을 올바른 단어로 봅니다. 절대 바꾸지 않고, 잘못된 자판으로 입력되면 이 단어로 고칩니다. 쉼표로 구분하세요."],
     "save": ["Save", "Зберегти", "Zapisz", "Sichern", "Guardar", "Enregistrer", "Salva", "Guardar", "Kaydet", "Bewaar", "Uložit", "Spara", "Tallenna", "Salvează", "Mentés", "Αποθήκευση", "Запази", "שמירה", "حفظ", "सहेजें", "저장"],
     "cancel": ["Cancel", "Скасувати", "Anuluj", "Abbrechen", "Cancelar", "Annuler", "Annulla", "Cancelar", "İptal", "Annuleer", "Zrušit", "Avbryt", "Kumoa", "Anulează", "Mégse", "Ακύρωση", "Отказ", "ביטול", "إلغاء", "रद्द करें", "취소"],
     "uiLang": ["Menu language", "Мова меню", "Język menu", "Menüsprache", "Idioma del menú", "Langue du menu", "Lingua del menu", "Idioma do menu", "Menü dili", "Menutaal", "Jazyk nabídky", "Menyspråk", "Valikon kieli", "Limba meniului", "Menü nyelve", "Γλώσσα μενού", "Език на менюто", "שפת התפריט", "لغة القائمة", "मेनू की भाषा", "메뉴 언어"],
@@ -501,12 +502,15 @@ final class Engine {
             // Cyrillic UK/RU words spelled the same still switch the layout — that's what users mix up.
             if t == typed, isLatin(t) { continue }
             guard l.maps(keys), !consonantRun(t) else { continue }
+            if settings.words.contains(t.lowercased()) { return l }  // the user's own word («скілі»)
             let m = margin(typed, cur.lang, t, l.lang)
             if dictionaryWorks(l.lang) {
-                // without the typed language's dictionary, also ask the models which side looks real
-                // close languages in one script (Belarusian ↔ Russian) need the strict margin
+                // without the typed language's dictionary, also ask the models which side looks real;
+                // close languages in one script (Belarusian ↔ Russian) need the stricter margin
                 let need = isCyrillic(typed) && isCyrillic(t) ? Engine.marginCyrillic : Engine.marginForDictWord
                 if isWord(t, l.lang), curDict || (m ?? 0) >= need { return l }
+                // slang the dictionary doesn't know («гуглити»): long, another script, clearly typical of the language
+                if t.count >= 5, isLatin(typed) != isLatin(t), (m ?? 0) >= Engine.marginNeeded { return l }
             } else if let lm = model(l.lang) {
                 // no dictionary there: a frequent word, or clearly more typical than what was typed
                 if lm.has(t) || (m ?? 0) >= Engine.marginNeeded { return l }

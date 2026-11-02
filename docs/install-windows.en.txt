@@ -13,7 +13,7 @@ HOW TO USE
 • Press Shift twice quickly — the last word or the selected text
   is converted to another layout.
 • Click the language code in the tray for the menu: turn off, sound, exclusions,
-  language per app, word exceptions, menu language.
+  language per app, my words, menu language.
 • Quit: menu → "Quit". Starts automatically at Windows login.
 
 • Like it? Support: https://donatello.to/aura-switcher ☕

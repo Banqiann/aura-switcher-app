@@ -26,9 +26,9 @@ Don't work in (recent apps)
 Language bindings
 Empty
 Launch at login
-Word exceptions…
-AURA Switcher — word exceptions
-AURA Switcher will never auto-correct these words. Separate them with commas.
+My words…
+AURA Switcher — my words
+AURA Switcher treats these words as correct: it never changes them, and fixes them when typed in the wrong layout. Separate them with commas.
 Save
 Cancel
 Menu language
@@ -56,9 +56,9 @@ uk Українська
 Прив'язки мов
 Порожньо
 Запускати під час входу
-Слова-винятки…
-AURA Switcher — слова-винятки
-Ці слова AURA Switcher ніколи не виправлятиме автоматично. Через кому.
+Мої слова…
+AURA Switcher — мої слова
+Ці слова AURA Switcher вважає правильними: не змінює їх, а набрані не в тій розкладці — виправляє на них. Через кому.
 Зберегти
 Скасувати
 Мова меню
@@ -86,9 +86,9 @@ Nie działaj w (ostatnie aplikacje)
 Przypisania języków
 Pusto
 Uruchamiaj przy logowaniu
-Wyjątki słów…
-AURA Switcher — wyjątki słów
-AURA Switcher nigdy nie poprawi automatycznie tych słów. Oddziel je przecinkami.
+Moje słowa…
+AURA Switcher — moje słowa
+AURA Switcher uznaje te słowa za poprawne: nigdy ich nie zmienia, a wpisane w złym układzie poprawia na nie. Oddziel je przecinkami.
 Zapisz
 Anuluj
 Język menu
@@ -116,9 +116,9 @@ Nicht aktiv in (letzte Apps)
 Sprachzuordnungen
 Leer
 Bei Anmeldung starten
-Wortausnahmen…
-AURA Switcher — Wortausnahmen
-Diese Wörter korrigiert AURA Switcher nie automatisch. Durch Kommas trennen.
+Meine Wörter…
+AURA Switcher — meine Wörter
+AURA Switcher hält diese Wörter für richtig: ändert sie nie und korrigiert sie, wenn sie im falschen Layout getippt wurden. Durch Kommas trennen.
 Sichern
 Abbrechen
 Menüsprache
@@ -146,9 +146,9 @@ No funcionar en (apps recientes)
 Idiomas asignados
 Vacío
 Abrir al iniciar sesión
-Palabras excluidas…
-AURA Switcher — palabras excluidas
-AURA Switcher nunca corregirá estas palabras automáticamente. Sepáralas con comas.
+Mis palabras…
+AURA Switcher — mis palabras
+AURA Switcher considera correctas estas palabras: nunca las cambia y las corrige si se escriben con la distribución equivocada. Sepáralas con comas.
 Guardar
 Cancelar
 Idioma del menú
@@ -176,9 +176,9 @@ Ne pas fonctionner dans (apps récentes)
 Langues associées
 Vide
 Ouvrir à la connexion
-Mots exclus…
-AURA Switcher — mots exclus
-AURA Switcher ne corrigera jamais ces mots automatiquement. Séparez-les par des virgules.
+Mes mots…
+AURA Switcher — mes mots
+AURA Switcher considère ces mots comme corrects : il ne les modifie jamais et les corrige s'ils sont tapés avec la mauvaise disposition. Séparez-les par des virgules.
 Enregistrer
 Annuler
 Langue du menu
@@ -206,9 +206,9 @@ Non funzionare in (app recenti)
 Lingue associate
 Vuoto
 Apri al login
-Parole escluse…
-AURA Switcher — parole escluse
-AURA Switcher non correggerà mai automaticamente queste parole. Separale con virgole.
+Le mie parole…
+AURA Switcher — le mie parole
+AURA Switcher considera corrette queste parole: non le cambia mai e le corregge se digitate con il layout sbagliato. Separale con virgole.
 Salva
 Annulla
 Lingua del menu
@@ -236,9 +236,9 @@ Não funcionar em (apps recentes)
 Idiomas associados
 Vazio
 Abrir ao iniciar sessão
-Palavras excluídas…
-AURA Switcher — palavras excluídas
-O AURA Switcher nunca corrigirá estas palavras automaticamente. Separe-as com vírgulas.
+As minhas palavras…
+AURA Switcher — as minhas palavras
+O AURA Switcher considera estas palavras corretas: nunca as altera e corrige-as se forem digitadas no layout errado. Separe-as com vírgulas.
 Guardar
 Cancelar
 Idioma do menu
@@ -266,9 +266,9 @@ Atama yok
 Dil atamaları
 Boş
 Oturum açılışında başlat
-Kelime istisnaları…
-AURA Switcher — kelime istisnaları
-AURA Switcher bu kelimeleri asla otomatik düzeltmez. Virgülle ayırın.
+Kelimelerim…
+AURA Switcher — kelimelerim
+AURA Switcher bu kelimeleri doğru kabul eder: asla değiştirmez, yanlış düzende yazılırsa onlara düzeltir. Virgülle ayırın.
 Kaydet
 İptal
 Menü dili
@@ -296,9 +296,9 @@ Niet werken in (recente apps)
 Taalkoppelingen
 Leeg
 Starten bij inloggen
-Woorduitzonderingen…
-AURA Switcher — woorduitzonderingen
-AURA Switcher corrigeert deze woorden nooit automatisch. Scheid ze met komma's.
+Mijn woorden…
+AURA Switcher — mijn woorden
+AURA Switcher beschouwt deze woorden als juist: verandert ze nooit en verbetert ze als ze in de verkeerde indeling zijn getypt. Scheid ze met komma's.
 Bewaar
 Annuleer
 Menutaal
@@ -326,9 +326,9 @@ Nefungovat v (nedávné aplikace)
 Přiřazení jazyků
 Prázdné
 Spouštět po přihlášení
-Výjimky slov…
-AURA Switcher — výjimky slov
-Tato slova AURA Switcher nikdy automaticky neopraví. Oddělte je čárkami.
+Moje slova…
+AURA Switcher — moje slova
+AURA Switcher považuje tato slova za správná: nikdy je nemění a opraví je, když jsou napsána ve špatném rozložení. Oddělte je čárkami.
 Uložit
 Zrušit
 Jazyk nabídky
@@ -356,9 +356,9 @@ Arbeta inte i (senaste appar)
 Språkkopplingar
 Tomt
 Starta vid inloggning
-Ordundantag…
-AURA Switcher — ordundantag
-AURA Switcher rättar aldrig dessa ord automatiskt. Separera med kommatecken.
+Mina ord…
+AURA Switcher — mina ord
+AURA Switcher ser dessa ord som rätt: ändrar dem aldrig och rättar dem om de skrivs med fel layout. Separera med kommatecken.
 Spara
 Avbryt
 Menyspråk
@@ -386,9 +386,9 @@ Poikkeukset
 Kieliliitokset
 Tyhjä
 Käynnistä kirjautuessa
-Sanapoikkeukset…
-AURA Switcher — sanapoikkeukset
-AURA Switcher ei koskaan korjaa näitä sanoja automaattisesti. Erota pilkuilla.
+Omat sanat…
+AURA Switcher — omat sanat
+AURA Switcher pitää näitä sanoja oikeina: ei koskaan muuta niitä ja korjaa ne, jos ne on kirjoitettu väärällä asettelulla. Erota pilkuilla.
 Tallenna
 Kumoa
 Valikon kieli
@@ -416,9 +416,9 @@ Nu funcționa în (aplicații recente)
 Limbi asociate
 Gol
 Pornește la autentificare
-Cuvinte excluse…
-AURA Switcher — cuvinte excluse
-AURA Switcher nu va corecta niciodată automat aceste cuvinte. Separați-le prin virgulă.
+Cuvintele mele…
+AURA Switcher — cuvintele mele
+AURA Switcher consideră aceste cuvinte corecte: nu le schimbă niciodată și le corectează dacă sunt tastate în aranjamentul greșit. Separați-le prin virgulă.
 Salvează
 Anulează
 Limba meniului
@@ -446,9 +446,9 @@ Ne működjön itt (legutóbbi alkalmazások)
 Nyelvi hozzárendelések
 Üres
 Indítás bejelentkezéskor
-Szókivételek…
-AURA Switcher — szókivételek
-Ezeket a szavakat az AURA Switcher soha nem javítja automatikusan. Vesszővel válassza el.
+Saját szavak…
+AURA Switcher — saját szavak
+Az AURA Switcher ezeket a szavakat helyesnek tekinti: soha nem módosítja őket, és kijavítja, ha rossz kiosztással gépelték. Vesszővel válassza el.
 Mentés
 Mégse
 Menü nyelve
@@ -476,9 +476,9 @@ el Ελληνικά
 Αντιστοιχίσεις γλωσσών
 Κενό
 Εκκίνηση κατά τη σύνδεση
-Εξαιρέσεις λέξεων…
-AURA Switcher — εξαιρέσεις λέξεων
-Το AURA Switcher δεν θα διορθώνει ποτέ αυτόματα αυτές τις λέξεις. Χωρίστε τις με κόμμα.
+Οι λέξεις μου…
+AURA Switcher — οι λέξεις μου
+Το AURA Switcher θεωρεί σωστές αυτές τις λέξεις: δεν τις αλλάζει ποτέ και τις διορθώνει όταν πληκτρολογηθούν με λάθος διάταξη. Χωρίστε τις με κόμμα.
 Αποθήκευση
 Ακύρωση
 Γλώσσα μενού
@@ -506,9 +506,9 @@ bg Български
 Обвързани езици
 Празно
 Стартиране при вход
-Думи-изключения…
-AURA Switcher — думи-изключения
-AURA Switcher никога няма да поправя автоматично тези думи. Разделете ги със запетая.
+Моите думи…
+AURA Switcher — моите думи
+AURA Switcher смята тези думи за правилни: никога не ги променя и ги поправя, ако са написани с грешната подредба. Разделете ги със запетая.
 Запази
 Отказ
 Език на менюто
@@ -536,9 +536,9 @@ he עברית
 שיוכי שפה
 ריק
 הפעלה בעת התחברות
-מילים חריגות…
-AURA Switcher — מילים חריגות
-AURA Switcher לעולם לא יתקן מילים אלה אוטומטית. הפרידו בפסיקים.
+המילים שלי…
+AURA Switcher — המילים שלי
+AURA Switcher מתייחס למילים אלה כנכונות: לעולם לא משנה אותן, ומתקן אליהן כשהן מוקלדות בפריסה הלא נכונה. הפרידו בפסיקים.
 שמירה
 ביטול
 שפת התפריט
@@ -566,9 +566,9 @@ ar العربية
 ربط اللغات
 فارغ
 التشغيل عند تسجيل الدخول
-كلمات مستثناة…
-AURA Switcher — كلمات مستثناة
-لن يصحح AURA Switcher هذه الكلمات تلقائيًا أبدًا. افصل بينها بفواصل.
+كلماتي…
+AURA Switcher — كلماتي
+يعدّ AURA Switcher هذه الكلمات صحيحة: لا يغيّرها أبدًا، ويصحّحها إليها إذا كُتبت بالتخطيط الخطأ. افصل بينها بفواصل.
 حفظ
 إلغاء
 لغة القائمة
@@ -596,9 +596,9 @@ hi हिन्दी
 भाषा बंधन
 खाली
 लॉगिन पर शुरू करें
-शब्द अपवाद…
-AURA Switcher — शब्द अपवाद
-AURA Switcher इन शब्दों को कभी अपने आप नहीं सुधारेगा। अल्पविराम से अलग करें।
+मेरे शब्द…
+AURA Switcher — मेरे शब्द
+AURA Switcher इन शब्दों को सही मानता है: इन्हें कभी नहीं बदलता, और गलत लेआउट में टाइप होने पर इन्हीं में सुधार देता है। अल्पविराम से अलग करें।
 सहेजें
 रद्द करें
 मेनू की भाषा
@@ -626,9 +626,9 @@ ko 한국어
 언어 지정
 비어 있음
 로그인 시 실행
-예외 단어…
-AURA Switcher — 예외 단어
-AURA Switcher는 이 단어들을 자동으로 수정하지 않습니다. 쉼표로 구분하세요.
+내 단어…
+AURA Switcher — 내 단어
+AURA Switcher는 이 단어들을 올바른 단어로 봅니다. 절대 바꾸지 않고, 잘못된 자판으로 입력되면 이 단어로 고칩니다. 쉼표로 구분하세요.
 저장
 취소
 메뉴 언어

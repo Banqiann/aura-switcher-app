@@ -130,9 +130,9 @@ static const wchar_t* const UI_STR[][UI_N] = { // row: English first, then the o
     {L"Language bindings", L"Прив'язки мов", L"Przypisania języków", L"Sprachzuordnungen", L"Idiomas asignados", L"Langues associées", L"Lingue associate", L"Idiomas associados", L"Dil atamaları", L"Taalkoppelingen", L"Přiřazení jazyků", L"Språkkopplingar", L"Kieliliitokset", L"Limbi asociate", L"Nyelvi hozzárendelések", L"Αντιστοιχίσεις γλωσσών", L"Обвързани езици", L"שיוכי שפה", L"ربط اللغات", L"भाषा बंधन", L"언어 지정"},
     {L"Empty", L"Порожньо", L"Pusto", L"Leer", L"Vacío", L"Vide", L"Vuoto", L"Vazio", L"Boş", L"Leeg", L"Prázdné", L"Tomt", L"Tyhjä", L"Gol", L"Üres", L"Κενό", L"Празно", L"ריק", L"فارغ", L"खाली", L"비어 있음"},
     {L"Launch at login", L"Запускати під час входу", L"Uruchamiaj przy logowaniu", L"Bei Anmeldung starten", L"Abrir al iniciar sesión", L"Ouvrir à la connexion", L"Apri al login", L"Abrir ao iniciar sessão", L"Oturum açılışında başlat", L"Starten bij inloggen", L"Spouštět po přihlášení", L"Starta vid inloggning", L"Käynnistä kirjautuessa", L"Pornește la autentificare", L"Indítás bejelentkezéskor", L"Εκκίνηση κατά τη σύνδεση", L"Стартиране при вход", L"הפעלה בעת התחברות", L"التشغيل عند تسجيل الدخول", L"लॉगिन पर शुरू करें", L"로그인 시 실행"},
-    {L"Word exceptions…", L"Слова-винятки…", L"Wyjątki słów…", L"Wortausnahmen…", L"Palabras excluidas…", L"Mots exclus…", L"Parole escluse…", L"Palavras excluídas…", L"Kelime istisnaları…", L"Woorduitzonderingen…", L"Výjimky slov…", L"Ordundantag…", L"Sanapoikkeukset…", L"Cuvinte excluse…", L"Szókivételek…", L"Εξαιρέσεις λέξεων…", L"Думи-изключения…", L"מילים חריגות…", L"كلمات مستثناة…", L"शब्द अपवाद…", L"예외 단어…"},
-    {L"AURA Switcher — word exceptions", L"AURA Switcher — слова-винятки", L"AURA Switcher — wyjątki słów", L"AURA Switcher — Wortausnahmen", L"AURA Switcher — palabras excluidas", L"AURA Switcher — mots exclus", L"AURA Switcher — parole escluse", L"AURA Switcher — palavras excluídas", L"AURA Switcher — kelime istisnaları", L"AURA Switcher — woorduitzonderingen", L"AURA Switcher — výjimky slov", L"AURA Switcher — ordundantag", L"AURA Switcher — sanapoikkeukset", L"AURA Switcher — cuvinte excluse", L"AURA Switcher — szókivételek", L"AURA Switcher — εξαιρέσεις λέξεων", L"AURA Switcher — думи-изключения", L"AURA Switcher — מילים חריגות", L"AURA Switcher — كلمات مستثناة", L"AURA Switcher — शब्द अपवाद", L"AURA Switcher — 예외 단어"},
-    {L"AURA Switcher will never auto-correct these words. Separate them with commas.", L"Ці слова AURA Switcher ніколи не виправлятиме автоматично. Через кому.", L"AURA Switcher nigdy nie poprawi automatycznie tych słów. Oddziel je przecinkami.", L"Diese Wörter korrigiert AURA Switcher nie automatisch. Durch Kommas trennen.", L"AURA Switcher nunca corregirá estas palabras automáticamente. Sepáralas con comas.", L"AURA Switcher ne corrigera jamais ces mots automatiquement. Séparez-les par des virgules.", L"AURA Switcher non correggerà mai automaticamente queste parole. Separale con virgole.", L"O AURA Switcher nunca corrigirá estas palavras automaticamente. Separe-as com vírgulas.", L"AURA Switcher bu kelimeleri asla otomatik düzeltmez. Virgülle ayırın.", L"AURA Switcher corrigeert deze woorden nooit automatisch. Scheid ze met komma's.", L"Tato slova AURA Switcher nikdy automaticky neopraví. Oddělte je čárkami.", L"AURA Switcher rättar aldrig dessa ord automatiskt. Separera med kommatecken.", L"AURA Switcher ei koskaan korjaa näitä sanoja automaattisesti. Erota pilkuilla.", L"AURA Switcher nu va corecta niciodată automat aceste cuvinte. Separați-le prin virgulă.", L"Ezeket a szavakat az AURA Switcher soha nem javítja automatikusan. Vesszővel válassza el.", L"Το AURA Switcher δεν θα διορθώνει ποτέ αυτόματα αυτές τις λέξεις. Χωρίστε τις με κόμμα.", L"AURA Switcher никога няма да поправя автоматично тези думи. Разделете ги със запетая.", L"AURA Switcher לעולם לא יתקן מילים אלה אוטומטית. הפרידו בפסיקים.", L"لن يصحح AURA Switcher هذه الكلمات تلقائيًا أبدًا. افصل بينها بفواصل.", L"AURA Switcher इन शब्दों को कभी अपने आप नहीं सुधारेगा। अल्पविराम से अलग करें।", L"AURA Switcher는 이 단어들을 자동으로 수정하지 않습니다. 쉼표로 구분하세요."},
+    {L"My words…", L"Мої слова…", L"Moje słowa…", L"Meine Wörter…", L"Mis palabras…", L"Mes mots…", L"Le mie parole…", L"As minhas palavras…", L"Kelimelerim…", L"Mijn woorden…", L"Moje slova…", L"Mina ord…", L"Omat sanat…", L"Cuvintele mele…", L"Saját szavak…", L"Οι λέξεις μου…", L"Моите думи…", L"המילים שלי…", L"كلماتي…", L"मेरे शब्द…", L"내 단어…"},
+    {L"AURA Switcher — my words", L"AURA Switcher — мої слова", L"AURA Switcher — moje słowa", L"AURA Switcher — meine Wörter", L"AURA Switcher — mis palabras", L"AURA Switcher — mes mots", L"AURA Switcher — le mie parole", L"AURA Switcher — as minhas palavras", L"AURA Switcher — kelimelerim", L"AURA Switcher — mijn woorden", L"AURA Switcher — moje slova", L"AURA Switcher — mina ord", L"AURA Switcher — omat sanat", L"AURA Switcher — cuvintele mele", L"AURA Switcher — saját szavak", L"AURA Switcher — οι λέξεις μου", L"AURA Switcher — моите думи", L"AURA Switcher — המילים שלי", L"AURA Switcher — كلماتي", L"AURA Switcher — मेरे शब्द", L"AURA Switcher — 내 단어"},
+    {L"AURA Switcher treats these words as correct: it never changes them, and fixes them when typed in the wrong layout. Separate them with commas.", L"Ці слова AURA Switcher вважає правильними: не змінює їх, а набрані не в тій розкладці — виправляє на них. Через кому.", L"AURA Switcher uznaje te słowa za poprawne: nigdy ich nie zmienia, a wpisane w złym układzie poprawia na nie. Oddziel je przecinkami.", L"AURA Switcher hält diese Wörter für richtig: ändert sie nie und korrigiert sie, wenn sie im falschen Layout getippt wurden. Durch Kommas trennen.", L"AURA Switcher considera correctas estas palabras: nunca las cambia y las corrige si se escriben con la distribución equivocada. Sepáralas con comas.", L"AURA Switcher considère ces mots comme corrects : il ne les modifie jamais et les corrige s'ils sont tapés avec la mauvaise disposition. Séparez-les par des virgules.", L"AURA Switcher considera corrette queste parole: non le cambia mai e le corregge se digitate con il layout sbagliato. Separale con virgole.", L"O AURA Switcher considera estas palavras corretas: nunca as altera e corrige-as se forem digitadas no layout errado. Separe-as com vírgulas.", L"AURA Switcher bu kelimeleri doğru kabul eder: asla değiştirmez, yanlış düzende yazılırsa onlara düzeltir. Virgülle ayırın.", L"AURA Switcher beschouwt deze woorden als juist: verandert ze nooit en verbetert ze als ze in de verkeerde indeling zijn getypt. Scheid ze met komma's.", L"AURA Switcher považuje tato slova za správná: nikdy je nemění a opraví je, když jsou napsána ve špatném rozložení. Oddělte je čárkami.", L"AURA Switcher ser dessa ord som rätt: ändrar dem aldrig och rättar dem om de skrivs med fel layout. Separera med kommatecken.", L"AURA Switcher pitää näitä sanoja oikeina: ei koskaan muuta niitä ja korjaa ne, jos ne on kirjoitettu väärällä asettelulla. Erota pilkuilla.", L"AURA Switcher consideră aceste cuvinte corecte: nu le schimbă niciodată și le corectează dacă sunt tastate în aranjamentul greșit. Separați-le prin virgulă.", L"Az AURA Switcher ezeket a szavakat helyesnek tekinti: soha nem módosítja őket, és kijavítja, ha rossz kiosztással gépelték. Vesszővel válassza el.", L"Το AURA Switcher θεωρεί σωστές αυτές τις λέξεις: δεν τις αλλάζει ποτέ και τις διορθώνει όταν πληκτρολογηθούν με λάθος διάταξη. Χωρίστε τις με κόμμα.", L"AURA Switcher смята тези думи за правилни: никога не ги променя и ги поправя, ако са написани с грешната подредба. Разделете ги със запетая.", L"AURA Switcher מתייחס למילים אלה כנכונות: לעולם לא משנה אותן, ומתקן אליהן כשהן מוקלדות בפריסה הלא נכונה. הפרידו בפסיקים.", L"يعدّ AURA Switcher هذه الكلمات صحيحة: لا يغيّرها أبدًا، ويصحّحها إليها إذا كُتبت بالتخطيط الخطأ. افصل بينها بفواصل.", L"AURA Switcher इन शब्दों को सही मानता है: इन्हें कभी नहीं बदलता, और गलत लेआउट में टाइप होने पर इन्हीं में सुधार देता है। अल्पविराम से अलग करें।", L"AURA Switcher는 이 단어들을 올바른 단어로 봅니다. 절대 바꾸지 않고, 잘못된 자판으로 입력되면 이 단어로 고칩니다. 쉼표로 구분하세요."},
     {L"Save", L"Зберегти", L"Zapisz", L"Sichern", L"Guardar", L"Enregistrer", L"Salva", L"Guardar", L"Kaydet", L"Bewaar", L"Uložit", L"Spara", L"Tallenna", L"Salvează", L"Mentés", L"Αποθήκευση", L"Запази", L"שמירה", L"حفظ", L"सहेजें", L"저장"},
     {L"Cancel", L"Скасувати", L"Anuluj", L"Abbrechen", L"Cancelar", L"Annuler", L"Annulla", L"Cancelar", L"İptal", L"Annuleer", L"Zrušit", L"Avbryt", L"Kumoa", L"Anulează", L"Mégse", L"Ακύρωση", L"Отказ", L"ביטול", L"إلغاء", L"रद्द करें", L"취소"},
     {L"Menu language", L"Мова меню", L"Język menu", L"Menüsprache", L"Idioma del menú", L"Langue du menu", L"Lingua del menu", L"Idioma do menu", L"Menü dili", L"Menutaal", L"Jazyk nabídky", L"Menyspråk", L"Valikon kieli", L"Limba meniului", L"Menü nyelve", L"Γλώσσα μενού", L"Език на менюто", L"שפת התפריט", L"لغة القائمة", L"मेनू की भाषा", L"메뉴 언어"},
@@ -539,12 +539,15 @@ static int autoFixTarget(const vector<Key>& keys) {
         // Cyrillic UK/RU words spelled the same still switch the layout — that's what users mix up.
         if (t == typed && isLatin(t)) continue;
         if (!layouts[j].maps(keys) || consonantRun(t)) continue;
+        if (S.isUserWord(t)) return j;  // the user's own word («скілі»)
         double m = margin(typed, curLoc, t, layouts[j].locale);
         if (dictionaryWorks(layouts[j].locale)) {
-            // without the typed language's dictionary, also ask the models which side looks real
-            // close languages in one script (Belarusian ↔ Russian) need the strict margin
+            // without the typed language's dictionary, also ask the models which side looks real;
+            // close languages in one script (Belarusian ↔ Russian) need the stricter margin
             double need = isCyrillic(typed) && isCyrillic(t) ? kMarginCyrillic : kMarginForDictWord;
             if (isWord(t, layouts[j].locale) && (curDict || m >= need)) return j;
+            // slang the dictionary doesn't know («гуглити»): long, another script, clearly typical of the language
+            if (t.size() >= 5 && isLatin(typed) != isLatin(t) && m >= kMarginNeeded) return j;
         } else if (const LangModel* lm = model(layouts[j].locale)) {
             // no dictionary there: a frequent word, or clearly more typical than what was typed
             if (lm->has(t) || m >= kMarginNeeded) return j;
@@ -660,16 +663,17 @@ static void convertSelection(wstring text) {
 }
 
 // MARK: - Sounds (synthesized, identical on Mac and Windows)
-// Short soft sine blips: one tone for auto-correction, two rising tones for double ⇧.
+// A short quiet "tick" (fast attack, quick decay) for auto-correction, two rising ticks for double ⇧ —
+// soft enough to stop noticing after a while.
 
 static vector<BYTE> blip(std::initializer_list<double> freqs) {
-    const int rate = 44100, toneLen = rate * 45 / 1000, gap = rate * 25 / 1000;
+    const int rate = 44100, toneLen = rate * 50 / 1000, gap = rate * 30 / 1000;
     vector<short> pcm; int i = 0;
     for (double f : freqs) {
         if (i++) pcm.insert(pcm.end(), gap, 0);
         for (int n = 0; n < toneLen; n++) {
-            double env = std::min(1.0, n / 200.0) * std::min(1.0, (toneLen - n) / 800.0);  // no clicks
-            pcm.push_back(short(sin(2 * 3.14159265358979 * f * n / rate) * env * 0.22 * 32767));
+            double env = std::min(1.0, n / 40.0) * exp(-n / (rate * 0.012));  // no click, ~12 ms decay
+            pcm.push_back(short(sin(2 * 3.14159265358979 * f * n / rate) * env * 0.12 * 32767));
         }
     }
     vector<BYTE> w;
@@ -682,7 +686,7 @@ static vector<BYTE> blip(std::initializer_list<double> freqs) {
     const BYTE* p = (const BYTE*)pcm.data(); w.insert(w.end(), p, p + pcm.size() * 2);
     return w;
 }
-static const vector<BYTE> sndAuto = blip({1175}), sndShift = blip({880, 1320});
+static const vector<BYTE> sndAuto = blip({1568}), sndShift = blip({1318, 1760});
 static void playSound(const vector<BYTE>& s) {
     if (S.sound) PlaySoundW((LPCWSTR)s.data(), nullptr, SND_MEMORY | SND_ASYNC | SND_NODEFAULT);
 }

@@ -3,7 +3,7 @@ HOW TO USE
 • Press Shift twice quickly — the last word or the selected text
   is converted to another layout.
 • Click the language code in the menu bar (EN, УК, РУ) for the menu: turn off,
-  sound, exclude apps, language per app, word exceptions, menu language.
+  sound, exclude apps, language per app, my words, menu language.
 • Updates: menu → "Check for updates…" (a page in your browser tells whether
   there is a new version and how to update).
   After a month a reminder dot appears next to the language code. AURA itself never goes online.
