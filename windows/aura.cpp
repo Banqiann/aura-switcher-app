@@ -446,7 +446,7 @@ static bool isWord(wstring w, const wstring& locale) {
     static const std::map<wstring, wstring> two = {
         {L"uk", L" як що не та до на за по ти ми ви їх це її ще бо чи ні де то ну ой аж би зі із ця ці ті ок "},
         {L"ru", L" не на по за до от из во ко то же бы ли мы вы он её их да но ни уж ой ну ах ох со об ты та те эй ок "},
-        {L"en", L" is in on at to it he we me my of or an as be by do go if no so up us am hi ok oh ah ha eh yo "}};
+        {L"en", L" is in on at to it he we me my of or an as be by do go if no so up us am hi ok oh ah ha eh yo id "}};
     if (w.size() < 2) return false;
     for (wchar_t c : w) if (!IsCharAlphaW(c) && c != L'\'' && c != L'-') return false;
     wstring low = w; CharLowerBuffW(&low[0], DWORD(low.size()));
@@ -522,6 +522,23 @@ static double margin(const wstring& typed, const wstring& cur, const wstring& t,
 // more typical than what was typed; a real dictionary word only somewhat more
 static const double kMarginNeeded = 20, kMarginForDictWord = 5, kMarginCyrillic = 11;  // Belarusian ↔ Russian: «длінный» 13, true «сіла» 4
 
+// Code typed in the wrong layout — «сщтіщдуюдщп(ещефд)ж» is console.log(total); — is one "word" with
+// dots and brackets: starts with a letter, and every part (split on non-letters and camelCase) is a word.
+static bool isCode(const wstring& t, const wstring& locale) {
+    if (t.empty() || !IsCharAlphaW(t[0])) return false;
+    vector<wstring> parts; wstring cur;
+    for (wchar_t c : t) {
+        if (!IsCharAlphaW(c)) { if (!cur.empty()) parts.push_back(cur); cur.clear(); continue; }
+        if (IsCharUpperW(c) && !cur.empty() && IsCharLowerW(cur.back())) { parts.push_back(cur); cur.clear(); }
+        cur += c;
+    }
+    if (!cur.empty()) parts.push_back(cur);
+    size_t end = t.find_last_not_of(L";,.)");
+    bool punctuated = false; for (size_t i = 0; end != wstring::npos && i <= end; i++) if (!IsCharAlphaW(t[i])) punctuated = true;
+    bool long3 = false; for (auto& p : parts) { if (p.size() >= 3) long3 = true; if (p.size() < 2 || !isWord(p, locale)) return false; }
+    return (parts.size() > 1 || punctuated) && long3;
+}
+
 static void warmUpDictionaries() { reliable.clear(); for (auto& l : layouts) isWord(L"aura", l.locale); }
 
 static int autoFixTarget(const vector<Key>& keys) {
@@ -540,6 +557,7 @@ static int autoFixTarget(const vector<Key>& keys) {
         if (t == typed && isLatin(t)) continue;
         if (!layouts[j].maps(keys) || consonantRun(t)) continue;
         if (S.isUserWord(t)) return j;  // the user's own word («скілі»)
+        if (isLatin(t) && !isLatin(typed) && isCode(t, layouts[j].locale)) return j;
         double m = margin(typed, curLoc, t, layouts[j].locale);
         if (dictionaryWorks(layouts[j].locale)) {
             // without the typed language's dictionary, also ask the models which side looks real;

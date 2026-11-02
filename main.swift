@@ -417,7 +417,7 @@ final class Engine {
         "ru": ["не", "на", "по", "за", "до", "от", "из", "во", "ко", "то", "же", "бы", "ли", "мы", "вы", "он", "её", "их",
                "да", "но", "ни", "уж", "ой", "ну", "ах", "ох", "со", "об", "ты", "та", "те", "эй", "ок"],
         "en": ["is", "in", "on", "at", "to", "it", "he", "we", "me", "my", "of", "or", "an", "as", "be", "by", "do", "go",
-               "if", "no", "so", "up", "us", "am", "hi", "ok", "oh", "ah", "ha", "eh", "yo"]]
+               "if", "no", "so", "up", "us", "am", "hi", "ok", "oh", "ah", "ha", "eh", "yo", "id"]]
 
     func isWord(_ s: String, _ lang: String) -> Bool {
         var w = s.trimmingCharacters(in: .punctuationCharacters.union(.symbols))
@@ -457,6 +457,22 @@ final class Engine {
         var run = 0
         for c in s.lowercased() { run = "бвгґджзйклмнпрстфхцчшщ".contains(c) ? run + 1 : 0; if run >= 5 { return true } }
         return false
+    }
+
+    /// Code typed in the wrong layout — «сщтіщдуюдщп(ещефд)ж» is console.log(total); — is one "word" with
+    /// dots and brackets: starts with a letter, and every part (split on non-letters and camelCase) is a word.
+    func isCode(_ t: String, _ lang: String) -> Bool {
+        guard t.first?.isLetter == true else { return false }
+        var parts: [String] = [], cur = ""
+        for c in t {
+            if !c.isLetter { if !cur.isEmpty { parts.append(cur) }; cur = ""; continue }
+            if c.isUppercase, let last = cur.last, last.isLowercase { parts.append(cur); cur = "" }
+            cur.append(c)
+        }
+        if !cur.isEmpty { parts.append(cur) }
+        let punctuated = t.trimmingCharacters(in: CharacterSet(charactersIn: ";,.)")).contains { !$0.isLetter }
+        return (parts.count > 1 || punctuated) && parts.contains { $0.count >= 3 }
+            && parts.allSatisfy { $0.count >= 2 && isWord($0.lowercased(), lang) }
     }
 
     func isCyrillic(_ s: String) -> Bool { s.unicodeScalars.contains { (0x400...0x52F).contains($0.value) } }
@@ -503,6 +519,7 @@ final class Engine {
             if t == typed, isLatin(t) { continue }
             guard l.maps(keys), !consonantRun(t) else { continue }
             if settings.words.contains(t.lowercased()) { return l }  // the user's own word («скілі»)
+            if isLatin(t), !isLatin(typed), isCode(t, l.lang) { return l }
             let m = margin(typed, cur.lang, t, l.lang)
             if dictionaryWorks(l.lang) {
                 // without the typed language's dictionary, also ask the models which side looks real;
