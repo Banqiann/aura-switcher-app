@@ -42,16 +42,17 @@ static wstring run(const wstring& w, const Layout& meant, const Layout& typed) {
     return j < 0 ? L"" : layouts[j].text(k) + L"\x01";  // \x01: marks "changed", so a fix to the same text still differs from "left alone"
 }
 
-static vector<wstring> words(const wstring& code, size_t n) {
+static vector<wstring> words(const Layout& l, size_t n) {
+    wstring code = lang(l);
     std::ifstream f(utf8(root + L"\\lang\\" + code + L".txt"), std::ios::binary); std::string line;
     while (std::getline(f, line)) if (!line.empty() && line[0] != '#') break;
     vector<wstring> r; std::istringstream ss(line); std::string t;
-    bool dict = dictionaryWorks(code);
+    bool dict = dictionaryWorks(l.locale);
     while (r.size() < n && ss >> t) {
         wstring w = wide(t); bool letters = w.size() >= 2;
         for (wchar_t c : w) if (!IsCharAlphaW(c)) letters = false;
         // the lists come from film subtitles and have other languages' words: keep what the dictionary accepts
-        if (letters && (!dict || isWord(w, code))) r.push_back(w);
+        if (letters && (!dict || isWord(w, l.locale))) r.push_back(w);
     }
     return r;
 }
@@ -94,10 +95,10 @@ int wmain(int argc, wchar_t** argv) {
         layouts.clear(); for (auto id : s.ids) layouts.push_back(layout(id));
         reliable.clear();
         const Layout& en = layouts[0];
-        vector<wstring> enWords = words(L"en", N);
+        vector<wstring> enWords = words(en, N);
         for (size_t i = 1; i < layouts.size(); i++) {
             const Layout& l = layouts[i]; std::string p = std::string(s.name) + " " + utf8(lang(l));
-            vector<wstring> own = words(lang(l), N);
+            vector<wstring> own = words(l, N);
             vector<Case> a, b, c;
             for (auto& w : own) { a.push_back({w, &l, &en, true}); b.push_back({w, &l, &l, false}); }
             for (auto& w : enWords) c.push_back({w, &en, &l, true});
@@ -117,8 +118,18 @@ int wmain(int argc, wchar_t** argv) {
         {0, 1, L"console.log(total);", true}, {0, 1, L"fetchUser(id);", true},
         {0, 0, L"test1", false}, {0, 0, L"h2o", false}, {0, 0, L"github", false},
     };
+    // which spell checkers this Windows has (the rest goes through the language models)
+    std::string dicts;
+    for (auto id : {US, L"00000422", L"00000419", L"00000407", L"00000408", L"00030402", L"0000040D", L"00000401"}) {
+        layouts.push_back(layout(id)); dicts += " " + utf8(lang(layout(id))) + (dictionaryWorks(layout(id).locale) ? "+" : "-");
+    }
+    layouts.resize(2); reliable.clear();
+    printf("spell checkers (+ works, - model only):%s\n", dicts.c_str());
+    // code typed in the wrong layout is recognized by its English parts: needs the English spell checker
+    bool enDict = dictionaryWorks(layouts[0].locale);
     int mustFail = 0;
     for (auto& m : must) {
+        if (!enDict && wcspbrk(m.w, L".(")) { printf("skipped (no English spell checker): %s\n", utf8(m.w).c_str()); continue; }
         wstring got = run(m.w, layouts[m.meant], layouts[m.typed]);
         bool good = m.fix ? got == wstring(m.w) + L"\x01" : got.empty();
         if (!good) { mustFail++; printf("MUST FAIL: %s -> %s\n", utf8(m.w).c_str(), got.empty() ? "unchanged" : utf8(got).c_str()); }
