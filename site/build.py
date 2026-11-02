@@ -11,7 +11,7 @@ BASE = "https://klbk.github.io/aura-switcher/"
 COUNTER = '<script data-goatcounter="https://aura-switcher.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>'
 CHROME = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
 SRC = Path(__file__).resolve().parent
-ASSETS = ["icon.svg", "latest.js", "i18n-more.js", "seo.js", "shared.js", "google8a7be41a4753a620.html", "f9834e666c1005df874f5c53d176ecc3.txt"]  # last two: Search Console + IndexNow (Bing) keys, keep
+ASSETS = ["icon.svg", "og.jpg", "latest.js", "i18n-more.js", "seo.js", "shared.js", "google8a7be41a4753a620.html", "f9834e666c1005df874f5c53d176ecc3.txt"]  # last two: Search Console + IndexNow (Bing) keys, keep
 
 out = Path(sys.argv[1]).resolve()
 langs = re.findall(r"^  (\w\w): \{", (SRC / "seo.js").read_text(), re.M)
@@ -21,6 +21,8 @@ def head_links(canonical):
     alts = "".join(f'<link rel="alternate" hreflang="{l}" href="{BASE}{l}/">' for l in langs)
     return (f'<link rel="canonical" href="{canonical}">{alts}<link rel="alternate" hreflang="x-default" href="{BASE}">'
             f'<meta property="og:type" content="website"><meta property="og:url" content="{canonical}">'
+            f'<meta property="og:image" content="{BASE}og.jpg"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">'
+            '<meta name="twitter:card" content="summary_large_image">'
             )
 
 def render(html):
