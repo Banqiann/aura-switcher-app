@@ -270,6 +270,32 @@ const EXTRA = {
 };
 const EXTRA_KEYS = ["phoneBtn", "phoneCopied", "safeH", "safe1h", "safe1p", "safe2h", "safe2p", "safe3h", "safe3p"];
 for (const k in T) { const e = EXTRA[k] || EXTRA.en; EXTRA_KEYS.forEach((key, i) => T[k][key] = e[i]); }
+// The app's menu, shown on the page (strings from main.swift uiStrings)
+const MENU_KEYS = ["menabled", "mauto", "msound", "mapp", "mexclude", "mappLang", "mexclusions", "mbindings"];
+const MENU = {
+  en: ["Enabled", "Auto-correction", "Sound", "App: ", "Don't work in this app", "Language for this app", "Exclusions", "Language bindings"],
+  uk: ["Увімкнено", "Автовиправлення", "Звук", "Програма: ", "Не працювати в цій програмі", "Мова для цієї програми", "Винятки", "Прив'язки мов"],
+  pl: ["Włączone", "Autokorekta", "Dźwięk", "Aplikacja: ", "Nie działaj w tej aplikacji", "Język dla tej aplikacji", "Wyjątki", "Przypisania języków"],
+  de: ["Aktiviert", "Autokorrektur", "Ton", "App: ", "In dieser App nicht aktiv", "Sprache für diese App", "Ausnahmen", "Sprachzuordnungen"],
+  es: ["Activado", "Autocorrección", "Sonido", "App: ", "No funcionar en esta app", "Idioma para esta app", "Excepciones", "Idiomas asignados"],
+  fr: ["Activé", "Correction automatique", "Son", "App : ", "Ne pas fonctionner dans cette app", "Langue pour cette app", "Exceptions", "Langues associées"],
+  it: ["Attivo", "Correzione automatica", "Suono", "App: ", "Non funzionare in questa app", "Lingua per questa app", "Eccezioni", "Lingue associate"],
+  pt: ["Ativado", "Correção automática", "Som", "App: ", "Não funcionar nesta app", "Idioma para esta app", "Exceções", "Idiomas associados"],
+  tr: ["Etkin", "Otomatik düzeltme", "Ses", "Uygulama: ", "Bu uygulamada çalışma", "Bu uygulama için dil", "İstisnalar", "Dil atamaları"],
+  nl: ["Ingeschakeld", "Autocorrectie", "Geluid", "App: ", "Niet werken in deze app", "Taal voor deze app", "Uitzonderingen", "Taalkoppelingen"],
+  cs: ["Zapnuto", "Automatické opravy", "Zvuk", "Aplikace: ", "Nefungovat v této aplikaci", "Jazyk pro tuto aplikaci", "Výjimky", "Přiřazení jazyků"],
+  sv: ["Aktiverad", "Autokorrigering", "Ljud", "App: ", "Arbeta inte i den här appen", "Språk för den här appen", "Undantag", "Språkkopplingar"],
+  fi: ["Käytössä", "Automaattinen korjaus", "Ääni", "Ohjelma: ", "Älä toimi tässä ohjelmassa", "Kieli tälle ohjelmalle", "Poikkeukset", "Kieliliitokset"],
+  ro: ["Activat", "Corectare automată", "Sunet", "Aplicație: ", "Nu funcționa în această aplicație", "Limba pentru această aplicație", "Excepții", "Limbi asociate"],
+  hu: ["Bekapcsolva", "Automatikus javítás", "Hang", "Alkalmazás: ", "Ne működjön ebben az alkalmazásban", "Nyelv ehhez az alkalmazáshoz", "Kivételek", "Nyelvi hozzárendelések"],
+  el: ["Ενεργό", "Αυτόματη διόρθωση", "Ήχος", "Εφαρμογή: ", "Να μη λειτουργεί σε αυτή την εφαρμογή", "Γλώσσα για αυτή την εφαρμογή", "Εξαιρέσεις", "Αντιστοιχίσεις γλωσσών"],
+  bg: ["Включено", "Автокорекция", "Звук", "Програма: ", "Да не работи в тази програма", "Език за тази програма", "Изключения", "Обвързани езици"],
+  he: ["מופעל", "תיקון אוטומטי", "צליל", "יישום: ", "לא לפעול ביישום זה", "שפה ליישום זה", "חריגים", "שיוכי שפה"],
+  ar: ["مفعّل", "التصحيح التلقائي", "الصوت", "التطبيق: ", "لا تعمل في هذا التطبيق", "لغة هذا التطبيق", "الاستثناءات", "ربط اللغات"],
+  hi: ["चालू", "स्वतः सुधार", "ध्वनि", "ऐप: ", "इस ऐप में काम न करें", "इस ऐप की भाषा", "अपवाद", "भाषा बंधन"],
+  ko: ["켜기", "자동 수정", "소리", "앱: ", "이 앱에서 작동 안 함", "이 앱의 언어", "예외", "언어 지정"],
+};
+for (const k in T) { const e = MENU[k] || MENU.en; MENU_KEYS.forEach((key, i) => T[k][key] = e[i]); }
 if (typeof SEO !== "undefined") for (const k in SEO) if (T[k]) Object.assign(T[k], SEO[k]);  // seo.js: title, description, "alternative to…"
 
 function detectLang() {

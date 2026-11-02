@@ -3,7 +3,7 @@
 title, description, canonical and hreflang, plus sitemap.xml (robots.txt only works at the domain root, so none) — so search engines
 see every language. Rendering uses headless Chrome (texts live in JS).
 Usage: python3 build.py <out-dir>   (out-dir = clone of klbk/aura-switcher)"""
-import re, shutil, subprocess, sys, tempfile
+import html, json, re, shutil, subprocess, sys, tempfile
 from pathlib import Path
 
 BASE = "https://klbk.github.io/aura-switcher/"
@@ -14,6 +14,7 @@ SRC = Path(__file__).resolve().parent
 ASSETS = ["icon.svg", "og.jpg", "latest.js", "i18n-more.js", "seo.js", "shared.js", "google8a7be41a4753a620.html", "f9834e666c1005df874f5c53d176ecc3.txt"]  # last two: Search Console + IndexNow (Bing) keys, keep
 
 out = Path(sys.argv[1]).resolve()
+VERSION = re.search(r'version: "([^"]+)"', (SRC / "latest.js").read_text()).group(1)
 langs = re.findall(r"^  (\w\w): \{", (SRC / "seo.js").read_text(), re.M)
 src = (SRC / "index.html").read_text()
 
@@ -39,6 +40,13 @@ def finish(dom, canonical, rel):
     title = re.search(r"<title>(.*?)</title>", dom).group(1)
     desc = re.search(r'<meta name="description" content="(.*?)">', dom).group(1)
     og = f'<meta property="og:title" content="{title}"><meta property="og:description" content="{desc}">'
+    lang = re.search(r'<html lang="(\w+)"', dom).group(1)
+    ld = {"@context": "https://schema.org", "@type": "SoftwareApplication", "name": "AURA Switcher", "url": canonical,
+          "description": html.unescape(desc), "inLanguage": lang, "applicationCategory": "UtilitiesApplication",
+          "operatingSystem": "macOS 13+, Windows 10/11", "softwareVersion": VERSION, "image": BASE + "og.jpg",
+          "downloadUrl": "https://github.com/klbk/aura-switcher/releases/latest", "license": "https://www.gnu.org/licenses/gpl-3.0.html",
+          "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}}
+    og += '<script type="application/ld+json">' + json.dumps(ld, ensure_ascii=False).replace("</", "<\\/") + '</script>'
     dom = dom.replace("</head>", head_links(canonical) + og + COUNTER + "</head>", 1)
     if rel: dom = dom.replace('src="i18n-more.js"', 'src="../i18n-more.js"').replace('src="seo.js"', 'src="../seo.js"') \
                      .replace('src="shared.js"', 'src="../shared.js"').replace('"icon.svg"', '"../icon.svg"')
@@ -52,6 +60,8 @@ for l in langs:
     (out / l).mkdir(exist_ok=True)
     (out / l / "index.html").write_text(finish(render(page), f"{BASE}{l}/", True))
 (out / "index.html").write_text(finish(render(src), BASE, False))
-(out / "sitemap.xml").write_text('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
-    + "".join(f"  <url><loc>{BASE}{p}</loc></url>\n" for p in [""] + [f"{l}/" for l in langs]) + "</urlset>\n")
+today = __import__("datetime").date.today().isoformat()
+alts = "".join(f'<xhtml:link rel="alternate" hreflang="{l}" href="{BASE}{l}/"/>' for l in langs) + f'<xhtml:link rel="alternate" hreflang="x-default" href="{BASE}"/>'
+(out / "sitemap.xml").write_text('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">\n'
+    + "".join(f"  <url><loc>{BASE}{p}</loc><lastmod>{today}</lastmod>{alts}</url>\n" for p in [""] + [f"{l}/" for l in langs]) + "</urlset>\n")
 print(f"built {len(langs)} languages → {out}")

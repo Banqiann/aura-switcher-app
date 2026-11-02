@@ -78,7 +78,7 @@ section { padding:76px 0 0; }
 .card { background:var(--card); border:1px solid var(--line); border-radius:22px; padding:28px; position:relative; overflow:hidden; }
 .card h3 { font-size:20px; letter-spacing:-.01em; margin-bottom:6px; }
 .card p { color:var(--muted); font-size:15px; }
-.c1 { grid-column:span 3; } .c2 { grid-column:span 3; } .c3, .c4, .c5 { grid-column:span 2; } .c6 { grid-column:span 6; display:flex; align-items:center; justify-content:space-between; gap:24px; }
+.c1 { grid-column:span 3; } .c2 { grid-column:span 3; } .c4, .c5 { grid-column:span 3; } .c3, .c6 { grid-column:span 6; display:flex; align-items:center; justify-content:space-between; gap:24px; }
 .vis { height:120px; display:flex; align-items:center; justify-content:center; flex-wrap:wrap; gap:14px; margin-bottom:20px; }
 .key { min-width:64px; height:56px; padding:0 18px; border-radius:12px; display:grid; place-items:center; font-weight:700; font-size:18px;
        background:linear-gradient(180deg,#2b2f44,#1b1e2d); border:1px solid rgba(255,255,255,.12); box-shadow:0 4px 0 #0e1019, 0 10px 30px rgba(0,0,0,.4); }
@@ -88,6 +88,15 @@ section { padding:76px 0 0; }
 kbd { font:inherit; font-size:13px; padding:1px 7px; border-radius:6px; border:1px solid var(--line); background:rgba(255,255,255,.06); }
 .glow::after { content:""; position:absolute; width:260px; height:260px; border-radius:50%; right:-80px; top:-80px; background:radial-gradient(var(--blue),transparent 70%); opacity:.25; }
 
+/* the app's menu, drawn in the page language */
+.menu { flex:none; width:300px; padding:5px; border-radius:11px; font-size:13.5px; line-height:1; background:rgba(38,40,54,.92); border:1px solid rgba(255,255,255,.12);
+        box-shadow:0 20px 60px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.06); }
+.menu hr { border:0; border-top:1px solid rgba(255,255,255,.1); margin:5px 10px; }
+.mi { position:relative; padding:5px 22px 5px 24px; border-radius:6px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:#e8e9f1; }
+.mi.on::before { content:"✓"; position:absolute; inset-inline-start:8px; }
+.mi.sub::after { content:"›"; position:absolute; inset-inline-end:8px; color:var(--muted); }
+.mi.sel { background:var(--blue); color:#fff; } .mi.sel::after { color:#fff; }
+[dir="rtl"] .mi.sub::after { content:"‹"; }
 
 .steps { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; counter-reset:s; }
 .steps .card::before { counter-increment:s; content:"0" counter(s); display:block; font-size:44px; font-weight:800; letter-spacing:-.04em; margin-bottom:12px;
@@ -120,7 +129,7 @@ footer strong { color:var(--text); }
 .mobile .phone { display:block; } .mobile .arm { display:none; } .mobile .cta a:not(.coffee) { display:none; }
 .final .phone { margin-bottom:12px; }
 @media (max-width:820px) {
-  .c1,.c2,.c3,.c4,.c5,.c6 { grid-column:span 6; } .c6 { flex-direction:column; align-items:flex-start; }
+  .c1,.c2,.c3,.c4,.c5,.c6 { grid-column:span 6; } .c3, .c6 { flex-direction:column; align-items:flex-start; } .menu { width:100%; max-width:300px; }
   .steps { grid-template-columns:1fr; } .navr .btn.light { display:none; } .brand { white-space:nowrap; } .screen { padding:32px 22px; }
 }
 @media (max-width:520px) { #langName, .navr .coffee span { display:none; } .langbtn { padding:7px 10px; } }
@@ -160,7 +169,12 @@ footer strong { color:var(--text); }
   <div class="bento">
     <div class="card c1 glow"><div class="vis"><span class="key b">ghbdsn</span><span class="arrow">→</span><span class="key y">привіт</span></div><h3 data-t="f1h"></h3><p data-t="f1p"></p></div>
     <div class="card c2"><div class="vis"><span class="key">⇧ Shift</span><span class="key">⇧ Shift</span></div><h3 data-t="f2h"></h3><p data-t="f2p"></p></div>
-    <div class="card c3"><h3 data-t="f3h"></h3><p data-t="f3p"></p></div>
+    <div class="card c3"><div><h3 data-t="f3h"></h3><p data-t="f3p"></p></div>
+      <div class="menu" aria-hidden="true">
+        <div class="mi on" data-t="menabled"></div><div class="mi on" data-t="mauto"></div><div class="mi on" data-t="msound"></div><hr>
+        <div class="mi"><span data-t="mapp"></span>Telegram</div><div class="mi" data-t="mexclude"></div><div class="mi sub sel" data-t="mappLang"></div><hr>
+        <div class="mi sub" data-t="mexclusions"></div><div class="mi sub" data-t="mbindings"></div>
+      </div></div>
     <div class="card c4"><h3 data-t="f4h"></h3><p data-t="f4p"></p></div>
     <div class="card c5"><h3 data-t="f6h"></h3><p data-t="f6p"></p></div>
     <div class="card c6"><div><h3 data-t="f5h"></h3><p data-t="f5p"></p></div><div class="vis" style="margin:0;height:auto"><span class="key y">УК</span><span class="key">EN</span><span class="key b">DE</span><span class="key">PL</span><span class="key">ΕΛ</span></div></div>
