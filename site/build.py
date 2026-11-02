@@ -55,6 +55,8 @@ def finish(dom, canonical, rel):
 for a in ASSETS: shutil.copy(SRC / a, out)
 (out / "update").mkdir(exist_ok=True)  # update page (opened from the app's menu): not pre-rendered, not in the sitemap
 shutil.copy(SRC / "update" / "index.html", out / "update" / "index.html")
+(out / "privacy").mkdir(exist_ok=True)  # privacy policy (linked from the Microsoft Store listing)
+shutil.copy(SRC / "privacy" / "index.html", out / "privacy" / "index.html")
 for l in langs:
     page = src.replace('<html lang="uk">', f'<html lang="{l}" data-page="{l}">')
     (out / l).mkdir(exist_ok=True)
