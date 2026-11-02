@@ -237,37 +237,42 @@ static bool isLetterVk(BYTE vk) {
     return (vk >= 'A' && vk <= 'Z') || (vk >= '0' && vk <= '9') || (vk >= VK_OEM_1 && vk <= VK_OEM_3) || (vk >= VK_OEM_4 && vk <= VK_OEM_8) || vk == VK_OEM_102;
 }
 
+// what each character key types in layout h (tests build layouts this way too)
+static bool buildLayout(HKL h, Layout& L) {
+    L.hkl = h;
+    wchar_t name[LOCALE_NAME_MAX_LENGTH];
+    if (!LCIDToLocaleName(MAKELCID(LOWORD((UINT_PTR)h), SORT_DEFAULT), name, LOCALE_NAME_MAX_LENGTH, 0)) return false;
+    L.locale = name;
+    BYTE state[256] = {};
+    // character keys by scan code: number row, three letter rows, the extra ISO key
+    for (UINT sc = 0x02; sc <= 0x56; sc++) {
+        if (sc == 0x0E || sc == 0x0F || sc == 0x1C || sc == 0x1D || sc == 0x2A || (sc > 0x35 && sc < 0x56)) continue;
+        UINT vk = MapVirtualKeyExW(sc, MAPVK_VSC_TO_VK, h);
+        if (!vk || !isLetterVk(BYTE(vk))) continue;
+        for (int sh = 0; sh < 2; sh++) {
+            state[VK_SHIFT] = sh ? 0x80 : 0;
+            wchar_t buf[4];
+            int len = ToUnicodeEx(vk, sc, state, buf, 4, 4 /* don't change kbd state */, h);
+            if ((len != 1 && len != -1) || buf[0] < 0x20) continue;
+            Key k{BYTE(sc), sh != 0};
+            L.toChar[k] = buf[0];
+            if (!L.toKey.count(buf[0])) L.toKey[buf[0]] = k;
+            if (len == -1) {  // dead key: the spacing accent (´ ΄ ¨) decomposes to space + combining marks
+                wstring m; for (wchar_t c : normalize(wstring(1, buf[0]), NormalizationKD)) if (isMark(c)) m += c;
+                if (!m.empty()) L.dead[k] = m;
+            }
+        }
+    }
+    return !L.toChar.empty();
+}
 static vector<Layout> loadLayouts() {
     vector<Layout> r;
     HKL list[64]; int n = GetKeyboardLayoutList(64, list);
     for (int i = 0; i < n; i++) {
-        Layout L; L.hkl = list[i];
-        wchar_t name[LOCALE_NAME_MAX_LENGTH];
-        if (!LCIDToLocaleName(MAKELCID(LOWORD((UINT_PTR)list[i]), SORT_DEFAULT), name, LOCALE_NAME_MAX_LENGTH, 0)) continue;
-        L.locale = name;
+        Layout L;
+        if (!buildLayout(list[i], L)) continue;
         bool dup = false; for (auto& o : r) if (o.locale.substr(0, 2) == L.locale.substr(0, 2)) dup = true;
-        if (dup) continue;
-        BYTE state[256] = {};
-        // character keys by scan code: number row, three letter rows, the extra ISO key
-        for (UINT sc = 0x02; sc <= 0x56; sc++) {
-            if (sc == 0x0E || sc == 0x0F || sc == 0x1C || sc == 0x1D || sc == 0x2A || (sc > 0x35 && sc < 0x56)) continue;
-            UINT vk = MapVirtualKeyExW(sc, MAPVK_VSC_TO_VK, list[i]);
-            if (!vk || !isLetterVk(BYTE(vk))) continue;
-            for (int sh = 0; sh < 2; sh++) {
-                state[VK_SHIFT] = sh ? 0x80 : 0;
-                wchar_t buf[4];
-                int len = ToUnicodeEx(vk, sc, state, buf, 4, 4 /* don't change kbd state */, list[i]);
-                if ((len != 1 && len != -1) || buf[0] < 0x20) continue;
-                Key k{BYTE(sc), sh != 0};
-                L.toChar[k] = buf[0];
-                if (!L.toKey.count(buf[0])) L.toKey[buf[0]] = k;
-                if (len == -1) {  // dead key: the spacing accent (´ ΄ ¨) decomposes to space + combining marks
-                    wstring m; for (wchar_t c : normalize(wstring(1, buf[0]), NormalizationKD)) if (isMark(c)) m += c;
-                    if (!m.empty()) L.dead[k] = m;
-                }
-            }
-        }
-        if (!L.toChar.empty()) r.push_back(L);
+        if (!dup) r.push_back(L);
     }
     return r;
 }
@@ -275,7 +280,9 @@ static vector<Layout> loadLayouts() {
 static vector<Layout> layouts;
 static HWND hwndMain;
 
+static HKL forcedLayout = nullptr;  // tests set the "active" layout here instead of switching the system's
 static HKL fgLayout() {
+    if (forcedLayout) return forcedLayout;
     HWND fg = GetForegroundWindow();
     return GetKeyboardLayout(GetWindowThreadProcessId(fg, nullptr));
 }
@@ -1121,6 +1128,7 @@ static LRESULT CALLBACK wndProc(HWND h, UINT msg, WPARAM wp, LPARAM lp) {
     return DefWindowProcW(h, msg, wp, lp);
 }
 
+#ifndef AURA_TEST  // tests/windows.cpp includes this file with its own main
 int WINAPI wWinMain(HINSTANCE inst, HINSTANCE, PWSTR, int) {
     // single instance: a second copy would double every correction
     CreateMutexW(nullptr, TRUE, L"Local\\AURA-single-instance");
@@ -1159,3 +1167,4 @@ int WINAPI wWinMain(HINSTANCE inst, HINSTANCE, PWSTR, int) {
     CoUninitialize();
     return 0;
 }
+#endif

@@ -1,4 +1,4 @@
-# On every push: build the Mac app and run the auto-correction test (tests/run.sh).
+# On every push: build the apps and run the auto-correction tests (tests/run.sh, tests/run-windows.sh).
 name: test
 on: [push, pull_request]
 jobs:
@@ -10,6 +10,21 @@ jobs:
         run: ./build.sh --release
       - name: Auto-correction test
         run: tests/run.sh
+      - name: Failures
+        if: always()
+        run: cat tests/failures.txt || true
+  windows:
+    runs-on: windows-2025
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+      - uses: mlugg/setup-zig@v2
+        with:
+          version: 0.17.0
+      - name: Auto-correction test
+        run: tests/run-windows.sh
       - name: Failures
         if: always()
         run: cat tests/failures.txt || true
