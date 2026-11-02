@@ -14,6 +14,14 @@ LM_CS RCDATA "../lang/cs.txt"
 LM_FI RCDATA "../lang/fi.txt"
 LM_RO RCDATA "../lang/ro.txt"
 LM_HU RCDATA "../lang/hu.txt"
+LM_DE RCDATA "../lang/de.txt"
+LM_ES RCDATA "../lang/es.txt"
+LM_FR RCDATA "../lang/fr.txt"
+LM_IT RCDATA "../lang/it.txt"
+LM_PT RCDATA "../lang/pt.txt"
+LM_TR RCDATA "../lang/tr.txt"
+LM_SV RCDATA "../lang/sv.txt"
+LM_BG RCDATA "../lang/bg.txt"
 
 1 VERSIONINFO
 FILEVERSION 0,8,0,0

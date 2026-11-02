@@ -8,6 +8,7 @@ Sources (CC BY-SA 4.0, compatible with AURA's GPL-3.0):
   FrequencyWords by Hermit Dave — https://github.com/hermitdave/FrequencyWords (content/2018/<code>/<code>_50k.txt)
   Belarusian: word counts from be.wikipedia.org articles (one "word count" pair per line, same format)
 
+Languages built: en uk ru (trigrams only), be el he ar cs fi ro hu de es fr it pt tr sv bg.
 Usage: python3 tools/langmodel.py <dir with <code>.txt word lists> <out dir> <code>...
 """
 import math, sys, collections, unicodedata
