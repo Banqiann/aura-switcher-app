@@ -1,0 +1,69 @@
+<!doctype html>
+<!-- Microsoft Store screenshots (1920×1080): store-shots.html?l=uk|en&n=1|2, rendered with headless Chrome -->
+<html><head><meta charset="utf-8">
+<style>
+*{box-sizing:border-box;margin:0}
+body{width:1920px;height:1080px;overflow:hidden;font-family:"Segoe UI",-apple-system,"Helvetica Neue",sans-serif;
+  background:radial-gradient(1200px 800px at 75% 30%,#1d3b8f 0%,transparent 60%),radial-gradient(900px 700px at 20% 90%,#6b5a00 0%,transparent 55%),#0b1020;color:#fff}
+.cap{position:absolute;left:96px;top:120px;width:560px}
+.cap h1{font-size:64px;line-height:1.08;letter-spacing:-1.5px;font-weight:700}
+.cap p{margin-top:24px;font-size:28px;line-height:1.4;color:#c9cee0}
+.cap img{width:84px;height:84px;margin-bottom:36px}
+.win{position:absolute;left:760px;top:150px;width:1040px;height:640px;background:#202020;border-radius:10px;border:1px solid #3a3a3a;box-shadow:0 30px 80px rgba(0,0,0,.6);overflow:hidden}
+.tb{height:44px;display:flex;align-items:center;padding:0 16px;font-size:15px;color:#ddd;background:#2b2b2b}
+.tb .x{margin-left:auto;letter-spacing:28px;color:#bbb}
+.menu-bar{height:36px;display:flex;gap:26px;align-items:center;padding:0 18px;font-size:15px;color:#ccc;border-bottom:1px solid #333}
+.doc{padding:30px 34px;font:30px/1.7 Consolas,"Cascadia Mono",Menlo,monospace;color:#eee}
+.typed{color:#ff8a8a;text-decoration:line-through;text-decoration-color:#ff8a8a}
+.fixed{background:rgba(255,213,0,.18);color:#ffd500;border-radius:6px;padding:0 6px}
+.arrow{color:#3b8cff;padding:0 12px}
+.caret{display:inline-block;width:3px;height:34px;background:#fff;vertical-align:-6px}
+.bar{position:absolute;left:0;right:0;bottom:0;height:64px;background:rgba(28,28,30,.92);border-top:1px solid #333;display:flex;align-items:center}
+.start{position:absolute;left:50%;transform:translateX(-50%);display:flex;gap:18px}
+.start span{width:40px;height:40px;border-radius:8px;background:rgba(255,255,255,.12)}
+.start span:first-child{background:linear-gradient(135deg,#3b8cff,#1a5fd6)}
+.tray{margin-left:auto;margin-right:24px;display:flex;align-items:center;gap:20px;font-size:16px;color:#ddd}
+.code{width:34px;height:34px;border-radius:7px;background:#0057b7;color:#ffd500;font-weight:800;font-size:15px;display:flex;align-items:center;justify-content:center;outline:2px solid rgba(59,140,255,.0)}
+.code.hl{outline:3px solid #3b8cff;outline-offset:4px}
+.clock{text-align:right;line-height:1.25;font-size:14px}
+.pm{position:absolute;right:120px;bottom:80px;width:430px;background:#2c2c2c;border:1px solid #444;border-radius:10px;padding:6px;font-size:19px;box-shadow:0 20px 60px rgba(0,0,0,.6)}
+.mi{position:relative;padding:9px 16px 9px 44px;border-radius:5px;color:#f2f2f2}
+.mi.on::before{content:"✓";position:absolute;left:16px}
+.mi.dis{color:#8a8a8a}
+.mi.sub::after{content:"›";position:absolute;right:14px;color:#bbb}
+.mi.sel{background:#3d3d3d}
+.pm hr{border:0;border-top:1px solid #444;margin:5px 8px}
+.side{position:absolute;right:560px;bottom:300px;width:230px;background:#2c2c2c;border:1px solid #444;border-radius:10px;padding:6px;font-size:19px;box-shadow:0 20px 60px rgba(0,0,0,.6)}
+</style></head><body>
+<div class="cap"><img src="../icon.svg" alt=""><h1 id="h"></h1><p id="p"></p></div>
+<div id="stage"></div>
+<div class="bar"><div class="start"><span></span><span></span><span></span><span></span><span></span></div>
+ <div class="tray"><span>⌃</span><div class="code" id="code"></div><span>🔊</span><div class="clock">10:24<br>03.11.2026</div></div></div>
+<script>
+const q=new URLSearchParams(location.search), L=q.get("l")||"uk", N=q.get("n")||"1";
+const T={uk:{h1:"Розкладка виправляється сама",p1:"Набрали слово не в тій розкладці — після пробілу воно стає правильним, а розкладка перемикається.",
+ h2:"Своя мова для кожної програми",p2:"Термінал — завжди EN, Telegram — УК. Вимкніть AURA там, де вона не потрібна, і додайте свої слова.",
+ code:"УК",line1:"Привіт! Зустрінемось завтра о 10?",
+ menu:[["on","Увімкнено"],["on","Автовиправлення"],["on","Звук"],["hr"],["dis","Програма: Telegram.exe"],["","Не працювати в цій програмі"],["sub sel","Мова для цієї програми"],["hr"],["sub","Винятки"],["sub","Не працювати в (останні програми)"],["sub","Прив'язки мов"],["hr"],["on","Запускати під час входу"],["","Мої слова…"],["sub","Мова меню"],["dis","Подвійний ⇧ — змінити мову слова/виділення"],["","Повідомити про проблему…"],["","Вихід"]],
+ side:[["","Без прив'язки"],["","English"],["on","Українська"]]},
+ en:{h1:"Your keyboard layout fixes itself",p1:"Typed a word in the wrong layout? After Space it becomes right, and the layout switches.",
+ h2:"A language for every app",p2:"Terminal — always EN, Telegram — УК. Turn AURA off where you don't need it and add your own words.",
+ code:"EN",line1:"",
+ menu:[["on","Enabled"],["on","Auto-correction"],["on","Sound"],["hr"],["dis","App: Telegram.exe"],["","Don't work in this app"],["sub sel","Language for this app"],["hr"],["sub","Exclusions"],["sub","Don't work in (recent apps)"],["sub","Language bindings"],["hr"],["on","Launch at login"],["","My words…"],["sub","Menu language"],["dis","Double ⇧ — convert word/selection"],["","Report a problem…"],["","Quit"]],
+ side:[["","No binding"],["","English"],["on","Українська"]]}}[L];
+document.getElementById("h").textContent=T["h"+N]; document.getElementById("p").textContent=T["p"+N];
+const code=document.getElementById("code"); code.textContent=T.code;
+const st=document.getElementById("stage");
+const notepad=(title,body)=>`<div class="win"><div class="tb">${title}<span class="x">–▢✕</span></div><div class="menu-bar"><span>${L=="uk"?"Файл":"File"}</span><span>${L=="uk"?"Редагування":"Edit"}</span><span>${L=="uk"?"Перегляд":"View"}</span></div><div class="doc">${body}</div></div>`;
+if(N=="1"){
+  code.classList.add("hl");
+  const body = L=="uk"
+   ? `<div><span class="typed">ghbdsn</span><span class="arrow">→</span><span class="fixed">привіт</span></div><div><span class="typed">pfdnhf</span><span class="arrow">→</span><span class="fixed">завтра</span></div><br><div>${T.line1}<span class="caret"></span></div>`
+   : `<div><span class="typed">руддщ</span><span class="arrow">→</span><span class="fixed">hello</span></div><div><span class="typed">ьууешпп</span><span class="arrow">→</span><span class="fixed">meeting</span></div><br><div>Hello! See you at the meeting at 10?<span class="caret"></span></div>`;
+  st.innerHTML=notepad(L=="uk"?"Нотатки.txt – Блокнот":"Notes.txt – Notepad", body);
+} else {
+  st.innerHTML=`<div class="pm">${T.menu.map(([c,t])=>c=="hr"?"<hr>":`<div class="mi ${c}">${t}</div>`).join("")}</div>`+
+   `<div class="side">${T.side.map(([c,t])=>`<div class="mi ${c}">${t}</div>`).join("")}</div>`;
+  code.classList.add("hl"); code.textContent="УК";
+}
+</script></body></html>

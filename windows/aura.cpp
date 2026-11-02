@@ -995,7 +995,7 @@ static void showMenu() {
 
     // Store version: login start is the package's startup task, switched in Windows Settings → Apps → Startup
     item(m, ID_LOGIN, L_(L"Launch at login", L"Запускати під час входу"), packaged() || loginEnabled());
-    item(m, ID_WORDS, L_(L"Word exceptions…", L"Слова-винятки…"));
+    item(m, ID_WORDS, L_(L"My words…", L"Мої слова…"));
     HMENU um = CreatePopupMenu();
     item(um, ID_UI_SYS, L_(L"System", L"Системна"), S.uiLang.empty());
     for (int i = 0; i < UI_N; i++) item(um, UINT(ID_UI0 + i), UI_NAMES[i], S.uiLang == UI_LANGS[i]);
