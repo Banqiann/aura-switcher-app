@@ -1,0 +1,15 @@
+# On every push: build the Mac app and run the auto-correction test (tests/run.sh).
+name: test
+on: [push, pull_request]
+jobs:
+  mac:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build
+        run: ./build.sh --release
+      - name: Auto-correction test
+        run: tests/run.sh
+      - name: Failures
+        if: always()
+        run: cat tests/failures.txt || true

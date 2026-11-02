@@ -11,7 +11,7 @@ VERSION=0.8
 APP="build/$NAME.app"
 rm -rf build && mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
 for ARCH in arm64 x86_64; do
-  swiftc -O -swift-version 5 -target $ARCH-apple-macos13 main.swift -o build/bin-$ARCH
+  swiftc -O -swift-version 5 -target $ARCH-apple-macos13 engine.swift main.swift -o build/bin-$ARCH
 done
 lipo -create build/bin-arm64 build/bin-x86_64 -output "$APP/Contents/MacOS/$NAME"
 cp AppIcon.icns "$APP/Contents/Resources/"

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Menu translations for both apps. Edit here, then run: python3 tools/menu_i18n.py
-Rewrites the generated blocks in main.swift and windows/aura.cpp (between the BEGIN/END markers).
+Rewrites the generated blocks in engine.swift and windows/aura.cpp (between the BEGIN/END markers).
 Russian system → Ukrainian menu (no Russian translation on purpose)."""
 import re
 from pathlib import Path
@@ -665,7 +665,7 @@ swift += "let uiStrings: [String: [String]] = [ // key: one string per uiLangs\n
 for i, k in enumerate(KEYS):
     swift += f'    "{k}": [' + ", ".join(f'"{esc(l[i])}"' for _, _, l in langs) + "],\n"
 swift += "]\n"
-put("main.swift", B, E, swift)
+put("engine.swift", B, E, swift)
 
 cpp = f"static const int UI_N = {len(langs)};\n"
 cpp += "static const wchar_t* const UI_LANGS[UI_N] = {" + ", ".join(f'L"{c}"' for c, _, _ in langs) + "};\n"
