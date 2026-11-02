@@ -78,7 +78,7 @@ section { padding:76px 0 0; }
 .card { background:var(--card); border:1px solid var(--line); border-radius:22px; padding:28px; position:relative; overflow:hidden; }
 .card h3 { font-size:20px; letter-spacing:-.01em; margin-bottom:6px; }
 .card p { color:var(--muted); font-size:15px; }
-.c1 { grid-column:span 3; } .c2 { grid-column:span 3; } .c4, .c5 { grid-column:span 3; } .c3, .c6 { grid-column:span 6; display:flex; align-items:center; justify-content:space-between; gap:24px; }
+.c1 { grid-column:span 3; } .c2 { grid-column:span 3; } .c4, .c5 { grid-column:span 3; } .c6 { grid-column:span 6; } .c3 { grid-column:span 6; display:flex; align-items:center; justify-content:space-between; gap:24px; }
 .vis { height:120px; display:flex; align-items:center; justify-content:center; flex-wrap:wrap; gap:14px; margin-bottom:20px; }
 .key { min-width:64px; height:56px; padding:0 18px; border-radius:12px; display:grid; place-items:center; font-weight:700; font-size:18px;
        background:linear-gradient(180deg,#2b2f44,#1b1e2d); border:1px solid rgba(255,255,255,.12); box-shadow:0 4px 0 #0e1019, 0 10px 30px rgba(0,0,0,.4); }
@@ -88,6 +88,9 @@ section { padding:76px 0 0; }
 kbd { font:inherit; font-size:13px; padding:1px 7px; border-radius:6px; border:1px solid var(--line); background:rgba(255,255,255,.06); }
 .glow::after { content:""; position:absolute; width:260px; height:260px; border-radius:50%; right:-80px; top:-80px; background:radial-gradient(var(--blue),transparent 70%); opacity:.25; }
 
+.langs { display:flex; flex-wrap:wrap; gap:8px; margin-top:18px; }
+.langs span { font-size:14px; font-weight:600; padding:6px 12px; border-radius:9px; background:linear-gradient(180deg,#2b2f44,#1b1e2d); border:1px solid rgba(255,255,255,.12); }
+.langs .y { color:var(--yellow); } .langs .b { color:var(--blue); }
 /* the app's menu, drawn in the page language */
 .menu { flex:none; width:300px; padding:5px; border-radius:11px; font-size:13.5px; line-height:1; background:rgba(38,40,54,.92); border:1px solid rgba(255,255,255,.12);
         box-shadow:0 20px 60px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.06); }
@@ -129,7 +132,7 @@ footer strong { color:var(--text); }
 .mobile .phone { display:block; } .mobile .arm { display:none; } .mobile .cta a:not(.coffee) { display:none; }
 .final .phone { margin-bottom:12px; }
 @media (max-width:820px) {
-  .c1,.c2,.c3,.c4,.c5,.c6 { grid-column:span 6; } .c3, .c6 { flex-direction:column; align-items:flex-start; } .menu { width:100%; max-width:300px; }
+  .c1,.c2,.c3,.c4,.c5,.c6 { grid-column:span 6; } .c3 { flex-direction:column; align-items:flex-start; } .menu { width:100%; max-width:300px; }
   .steps { grid-template-columns:1fr; } .navr .btn.light { display:none; } .brand { white-space:nowrap; } .screen { padding:32px 22px; }
 }
 @media (max-width:520px) { #langName, .navr .coffee span { display:none; } .langbtn { padding:7px 10px; } }
@@ -177,7 +180,7 @@ footer strong { color:var(--text); }
       </div></div>
     <div class="card c4"><h3 data-t="f4h"></h3><p data-t="f4p"></p></div>
     <div class="card c5"><h3 data-t="f6h"></h3><p data-t="f6p"></p></div>
-    <div class="card c6"><div><h3 data-t="f5h"></h3><p data-t="f5p"></p></div><div class="vis" style="margin:0;height:auto"><span class="key y">УК</span><span class="key">EN</span><span class="key b">DE</span><span class="key">PL</span><span class="key">ΕΛ</span></div></div>
+    <div class="card c6"><h3 data-t="f5h"></h3><p data-t="f5p"></p><div class="langs"><span class=y>Українська</span><span class=b>English</span><span>Русский</span><span>Беларуская</span><span>Polski</span><span>Deutsch</span><span>Français</span><span>Español</span><span>Italiano</span><span>Português</span><span>Nederlands</span><span>Türkçe</span><span>Svenska</span><span>Čeština</span><span>Suomi</span><span>Română</span><span>Magyar</span><span>Ελληνικά</span><span>Български</span><span>עברית</span><span>العربية</span></div></div></div>
   </div>
 </div></section>
 
