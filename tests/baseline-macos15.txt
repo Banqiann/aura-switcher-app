@@ -1,0 +1,35 @@
+uk+en uk typed in en: fixed	98.9%	276/279
+uk+en uk typed right: kept	100.0%	279/279
+uk+en en typed in uk: fixed	96.7%	290/300
+uk+en en typed right: kept	100.0%	300/300
+uk+ru+en uk typed in en: fixed	98.9%	276/279
+uk+ru+en uk typed right: kept	100.0%	279/279
+uk+ru+en en typed in uk: fixed	96.7%	290/300
+uk+ru+en ru typed in en: fixed	93.0%	279/300
+uk+ru+en ru typed right: kept	100.0%	300/300
+uk+ru+en en typed in ru: fixed	97.3%	292/300
+uk+ru+en en typed right: kept	100.0%	300/300
+ru+en ru typed in en: fixed	99.0%	297/300
+ru+en ru typed right: kept	100.0%	300/300
+ru+en en typed in ru: fixed	97.3%	292/300
+ru+en en typed right: kept	100.0%	300/300
+de+en de typed in en: fixed	93.5%	29/31
+de+en de typed right: kept	100.0%	300/300
+de+en en typed in de: fixed	97.8%	44/45
+de+en en typed right: kept	100.0%	300/300
+el+en el typed in en: fixed	95.0%	285/300
+el+en el typed right: kept	100.0%	300/300
+el+en en typed in el: fixed	91.3%	274/300
+el+en en typed right: kept	100.0%	300/300
+bg+en bg typed in en: fixed	94.7%	284/300
+bg+en bg typed right: kept	100.0%	300/300
+bg+en en typed in bg: fixed	96.0%	288/300
+bg+en en typed right: kept	100.0%	300/300
+he+en he typed in en: fixed	96.7%	290/300
+he+en he typed right: kept	100.0%	300/300
+he+en en typed in he: fixed	91.0%	273/300
+he+en en typed right: kept	100.0%	300/300
+ar+en ar typed in en: fixed	93.3%	264/283
+ar+en ar typed right: kept	100.0%	283/283
+ar+en en typed in ar: fixed	97.7%	293/300
+ar+en en typed right: kept	100.0%	300/300
