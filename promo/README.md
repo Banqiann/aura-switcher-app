@@ -10,3 +10,5 @@ for i in $(seq 0 374); do "/Applications/Google Chrome.app/Contents/MacOS/Google
 swiftc -O encode.swift -o /tmp/v/enc && /tmp/v/enc /tmp/v/frames aura-promo-uk.mp4 30 && rm -rf /tmp/v
 ```
 For the English version use `&l=en` and name the output `aura-promo-en.mp4`.
+
+The MP4 needs an audio track (even silent): without one Telegram turns it into a GIF and Instagram rejects it. Mux a silent WAV in with AVMutableComposition + AVAssetExportSession (preset HighestQuality, .mp4).
