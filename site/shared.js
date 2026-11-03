@@ -179,6 +179,29 @@ const CONTACT = { uk: "Написати нам", en: "Contact us", pl: "Napisz d
   it: "Scrivici", pt: "Fale connosco", tr: "Bize yazın", nl: "Mail ons", cs: "Napište nám", sv: "Skriv till oss", fi: "Kirjoita meille",
   ro: "Scrie-ne", hu: "Írj nekünk", el: "Γράψτε μας", bg: "Пишете ни", he: "כתבו לנו", ar: "راسلنا", hi: "हमें लिखें", ko: "문의하기" };
 for (const k in CONTACT) if (T[k]) T[k].contact = CONTACT[k];
+// phones: what to do with the link
+const PHONE_NOTE = {"uk": "AURA — програма для комп'ютера (Mac і Windows). Надішліть посилання собі й відкрийте його на комп'ютері.",
+  "en": "AURA is a computer app (Mac and Windows). Send yourself the link and open it on your computer.",
+  "pl": "AURA to program na komputer (Mac i Windows). Wyślij sobie link i otwórz go na komputerze.",
+  "de": "AURA ist ein Programm für den Computer (Mac und Windows). Schick dir den Link und öffne ihn am Computer.",
+  "es": "AURA es una app para ordenador (Mac y Windows). Envíate el enlace y ábrelo en tu ordenador.",
+  "fr": "AURA est une application pour ordinateur (Mac et Windows). Envoyez-vous le lien et ouvrez-le sur votre ordinateur.",
+  "it": "AURA è un'app per computer (Mac e Windows). Inviati il link e aprilo sul computer.",
+  "pt": "AURA é um app para computador (Mac e Windows). Envie o link para você e abra no computador.",
+  "tr": "AURA bir bilgisayar uygulamasıdır (Mac ve Windows). Bağlantıyı kendinize gönderin ve bilgisayarda açın.",
+  "nl": "AURA is een app voor de computer (Mac en Windows). Stuur jezelf de link en open hem op je computer.",
+  "cs": "AURA je program pro počítač (Mac a Windows). Pošlete si odkaz a otevřete ho na počítači.",
+  "sv": "AURA är ett program för datorn (Mac och Windows). Skicka länken till dig själv och öppna den på datorn.",
+  "fi": "AURA on tietokoneohjelma (Mac ja Windows). Lähetä linkki itsellesi ja avaa se tietokoneella.",
+  "ro": "AURA este o aplicație pentru computer (Mac și Windows). Trimite-ți linkul și deschide-l pe computer.",
+  "hu": "Az AURA számítógépes program (Mac és Windows). Küldd el magadnak a linket, és nyisd meg a számítógépen.",
+  "el": "Το AURA είναι εφαρμογή για υπολογιστή (Mac και Windows). Στείλτε τον σύνδεσμο στον εαυτό σας και ανοίξτε τον στον υπολογιστή.",
+  "bg": "AURA е програма за компютър (Mac и Windows). Изпратете си линка и го отворете на компютъра.",
+  "he": "AURA היא תוכנה למחשב (Mac ו-Windows). שלחו לעצמכם את הקישור ופתחו אותו במחשב.",
+  "ar": "AURA برنامج للكمبيوتر (Mac وWindows). أرسل الرابط إلى نفسك وافتحه على الكمبيوتر.",
+  "hi": "AURA कंप्यूटर का ऐप है (Mac और Windows)। लिंक ख़ुद को भेजें और कंप्यूटर पर खोलें।",
+  "ko": "AURA는 컴퓨터용 프로그램입니다(Mac, Windows). 링크를 나에게 보내고 컴퓨터에서 여세요."};
+for (const k in PHONE_NOTE) if (T[k]) T[k].phoneNote = PHONE_NOTE[k];
 // phone visitors (nothing to install there) + "Is it safe?" block:
 // [phoneBtn, phoneCopied, safeH, safe1h, safe1p, safe2h, safe2p, safe3h, safe3p]
 const GH = '<a href="https://github.com/klbk/aura-switcher-app" target="_blank" rel="noopener">GitHub</a>';
@@ -344,6 +367,7 @@ if (/Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent) || (navigator.p
   document.documentElement.classList.add("mobile");
   document.querySelectorAll(".sendlink").forEach(b => b.onclick = async () => {
     const url = location.href.split("#")[0];
+    if (window.goatcounter && goatcounter.count) goatcounter.count({ path: "send-link", title: "Send the link to myself", event: true });
     if (navigator.share) { try { await navigator.share({ title: document.title, url }); } catch {} return; }
     try { await navigator.clipboard.writeText(url); b.textContent = T[lang].phoneCopied; } catch {}
   });

@@ -131,6 +131,8 @@ footer strong { color:var(--text); }
 .phone .btn { font:inherit; font-weight:600; border:0; cursor:pointer; }
 .mobile .phone { display:block; } .mobile .arm { display:none; } .mobile .cta a:not(.coffee) { display:none; }
 .final .phone { margin-bottom:12px; }
+.pnote { color:var(--muted); font-size:16px; max-width:420px; margin:0 auto 14px; }
+.purl { color:var(--muted); font-size:14px; margin-top:10px; user-select:all; }
 @media (max-width:820px) {
   .c1,.c2,.c3,.c4,.c5,.c6 { grid-column:span 6; } .c3 { flex-direction:column; align-items:flex-start; } .menu { width:100%; max-width:300px; }
   .steps { grid-template-columns:1fr; } .navr .btn.light { display:none; } .brand { white-space:nowrap; } .screen { padding:32px 22px; }
@@ -160,7 +162,7 @@ footer strong { color:var(--text); }
       <a class="btn light" href="https://github.com/klbk/aura-switcher/releases/latest/download/AURA-Switcher-mac.zip"><span data-t="dlMac"></span></a>
       <a class="btn ghost" href="https://github.com/klbk/aura-switcher/releases/latest/download/AURA-Switcher-windows-x64.zip">⊞ <span data-t="dlWin"></span></a>
     </div>
-    <div class="phone"><button class="btn light sendlink" data-t="phoneBtn"></button></div>
+    <div class="phone"><p class="pnote" data-t="phoneNote"></p><button class="btn light sendlink" data-t="phoneBtn"></button><p class="purl">klbk.github.io/aura-switcher</p></div>
     <div class="window" aria-hidden="true">
       <div class="menubar"><div class="dots"><i></i><i></i><i></i></div><span class="chip" id="demoChip">EN</span></div>
       <div class="screen"><div id="demoText"></div><div id="demoStatus"></div></div>
@@ -200,7 +202,7 @@ footer strong { color:var(--text); }
   </div>
   <div class="final">
     <h2 data-t="ctaH"></h2><p data-t="ctaP"></p>
-    <div class="phone"><button class="btn light sendlink" data-t="phoneBtn"></button></div>
+    <div class="phone"><p class="pnote" data-t="phoneNote"></p><button class="btn light sendlink" data-t="phoneBtn"></button><p class="purl">klbk.github.io/aura-switcher</p></div>
     <div class="cta"><a class="btn light" href="https://github.com/klbk/aura-switcher/releases/latest/download/AURA-Switcher-mac.zip"><span data-t="dlMac"></span></a><a class="btn ghost" href="https://github.com/klbk/aura-switcher/releases/latest/download/AURA-Switcher-windows-x64.zip">⊞ <span data-t="dlWin"></span></a><a class="btn coffee" href="https://donatello.to/aura-switcher" target="_blank" rel="noopener">☕ <span data-t="donate"></span></a></div>
     <p class="arm"><a href="https://github.com/klbk/aura-switcher/releases/latest/download/AURA-Switcher-windows-arm64.zip">Windows ARM64</a></p>
   </div>
